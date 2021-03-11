@@ -95,6 +95,5 @@ how to run the application, and an overview of the application file structure.
                                        
 
     Jupyter notebook file:  => /usr/share/notebooks/kws_aa
-                                        AA1.ipynb
-                                                             Jupyter notebook file for running demo.
+                                        kws_aa.ipynb              Jupyter notebook file for running demo.
 

@@ -32,10 +32,10 @@ SET(INSTALL_PATH "opt/xilinx")
 add_executable(kws_aa src/main.cpp src/kws_ds_cnn.cpp src/ds_cnn.cpp src/kws.cpp src/mfcc.cpp src/nn.cpp src/detection.cpp src/acapture_PS.cpp src/keyword_spotting.cpp)
 # target_include_directories(kws_aa PRIVATE ${GSTREAMER_INCLUDE_DIRS})
 
-add_library(libCMSIS SHARED IMPORTED) # or STATIC instead of SHARED
-set_target_properties(libCMSIS PROPERTIES
-  IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/script/liblibCMSIS.so"
-)
+#add_library(libCMSIS SHARED IMPORTED) # or STATIC instead of SHARED
+##set_target_properties(libCMSIS PROPERTIES
+#  IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/script/liblibCMSIS.so"
+#)
 target_link_libraries(kws_aa
   gstapp-1.0 gstreamer-1.0 gstbase-1.0 gobject-2.0 glib-2.0 gstvideo-1.0 gstallocators-1.0 gstrtsp-1.0 gstrtspserver-1.0
   glib-2.0 gobject-2.0 xilinxopencl pthread rt dl crypt stdc++ asound libCMSIS opencv_core opencv_video opencv_videoio opencv_imgproc opencv_imgcodecs opencv_highgui vitis_ai_library-yolov2 vitis_ai_library-facedetect vitis_ai_library-platedetect vitis_ai_library-lanedetect vitis_ai_library-segmentation glog )
