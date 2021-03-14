@@ -1,3 +1,31 @@
+/*
+ *  aplay.c - plays and records
+ *
+ *      CREATIVE LABS CHANNEL-files
+ *      Microsoft WAVE-files
+ *      SPARC AUDIO .AU-files
+ *      Raw Data
+ *
+ *  Copyright (c) by Jaroslav Kysela <perex@perex.cz>
+ *  Based on vplay program by Michael Beck
+ *
+ *
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program; if not, write to the Free Software
+ *   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ */
+
 #include <iostream>
 #define ALSA_PCM_NEW_HW_PARAMS_API
 #ifndef _GNU_SOURCE
@@ -25,7 +53,10 @@
 #include <sys/types.h>
 #include <endian.h>
 #include <alsa/asoundlib.h>
-#include "acapture_init.h"
+#include "aconfig.h"
+#include "gettext.h"
+//#include "formats.h"
+//#include "version.h"
 
 #ifdef SND_CHMAP_API_VERSION
 #define CONFIG_SUPPORT_CHMAP	1
@@ -757,13 +788,12 @@ static void capture()
 			memcpy((((char *)InputData)+audio_pos), audiobuf, c);
 			
 			Record_flag[flag_pos] = true;
-			//cout << "flag[" << flag_pos << "]" << Record_flag[flag_pos] << ": C=" << c << endl;
 			flag_pos++;			
 			count -= c;
 			rest -= c;
 			audio_pos += c;			
 							
-			if(audio_pos>=(ddr_buffer*chunk_bytes*50)){
+			if(audio_pos>=(ddr_buffer*chunk_bytes)){
 				audio_pos = 0;
 				flag_pos = 0;
 			}

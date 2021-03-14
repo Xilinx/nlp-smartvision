@@ -1,3 +1,19 @@
+/*
+ * Copyright 2021 Xilinx Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include <vitis/ai/facedetect.hpp>
 #include <vitis/ai/nnpp/facedetect.hpp>
 #include "./process_result_facedetect.hpp"
@@ -5,10 +21,6 @@
 #include <vitis/ai/yolov2.hpp>
 #include <vitis/ai/nnpp/yolov2.hpp>
 #include "./process_result_objectdetect.hpp"
-
-#include <vitis/ai/lanedetect.hpp>
-#include <vitis/ai/nnpp/lanedetect.hpp>
-#include "./process_result_lanedetect.hpp"
 
 #include <vitis/ai/segmentation.hpp>
 #include <vitis/ai/nnpp/segmentation.hpp>
@@ -23,7 +35,6 @@
 #include<semaphore.h>
 #include <memory>
 #include <thread>
-//#include <chrono>
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
@@ -43,8 +54,8 @@ void Detection()
 	//auto ml_task_3 = vitis::ai::Segmentation8UC3::create("FPN-resnet18_Endov");
 	//auto ml_task_4 = vitis::ai::RoadLine::create("vpgnet_pruned_0_99");
 	//	    std:: cout << "created" << std::endl;
-	auto t_last = std::chrono::steady_clock::now();
-	auto t_now = std::chrono::steady_clock::now();
+	//auto t_last = std::chrono::steady_clock::now();
+	//auto t_now = std::chrono::steady_clock::now();
 	auto t_1 = std::chrono::steady_clock::now();
 	auto t_2 = std::chrono::steady_clock::now();
 	while (true)
@@ -52,7 +63,7 @@ void Detection()
 		t_1 = std::chrono::steady_clock::now();
 		auto d_milli = std::chrono::duration_cast<std::chrono::milliseconds>(t_1 - t_2).count();
 		t_2 = t_1;
-		  t_1 = std::chrono::steady_clock::now();
+		t_1 = std::chrono::steady_clock::now();
 
 		//input.read(cur_frame);
 		switch (model)

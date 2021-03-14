@@ -1,6 +1,20 @@
+/*
+ * Copyright 2021 Xilinx Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ 
 #include "kws_ds_cnn.h"
-#include "wav_data.h"
-
 #include<thread>
 #include<memory>
 #include<pthread.h>
@@ -17,34 +31,34 @@ using namespace std::chrono;
 void Keyword_Spotting()
 {
 	char command[256];
-	char output_class[12][8] = {"Silence", "Unknown", "yes", "no", "up", "down", "left", "right", "on", "off", "stop", "go"};
+	//char output_class[12][8] = {"Silence", "Unknown", "yes", "no", "up", "down", "left", "right", "on", "off", "stop", "go"};
     float window_energy=0;
 	float window[6];
 	int wpos = 5;
-    float silence_threshold = (float)(pow(2,30)*window_size*6*15*pow(10,-5));    //Energy less than this is a silence
-    int cut_start = 0;
-    int cut_end = 0;
-    int sample_count = 0;   // First 1 sec is considered as non-silence
+    float silence_threshold = (float)(pow(2,30)*window_size*6*15*pow(10,-5));    //Total energy of 6 consecutive audio sample windows, which is less than this is a silence
+    int Voice_start = 0;
+    int Voice_end = 0;
+    int sample_count = 0;   
     int one_count = 0;
     int flag_pos = 0;
 	short InputChunk[16000]; // Audio Input samples are in signed int16 precision
 
 	while(1){
 		
-		for(int j=0; j<5; j++){
+		for(int j=0; j<5; j++){				// Calculation of energy for first 5 audio windows
 			while(1){
-				if(Record_flag[flag_pos]==1){
+				if(Record_flag[flag_pos]==1){		// Checking whether this audio window is filled with samples or not
 					window[j]=0;
 					for(int i=0; i<window_size; i++){
-						window[j] +=  (float)pow(InputData[sample_count+i],2);}	
+						window[j] +=  (float)pow(InputData[sample_count+i],2);}		// Energy of audio window
 					Record_flag[flag_pos] = 0;			
 					flag_pos++;
-					if(flag_pos>=(50*ddr_buffer)){
+					if(flag_pos>=(ddr_buffer)){		// If all the windows are completed, then back to 0
 						flag_pos = 0;			
 					}
 					break;
 				}
-				this_thread::sleep_for(chrono::milliseconds(5) );	
+				this_thread::sleep_for(chrono::milliseconds(5) );	// If the audio is not captured, then wait for 5 milli sec
 			}
 			sample_count = flag_pos*window_size;
 		}
@@ -57,10 +71,10 @@ void Keyword_Spotting()
 			while(1){
 				if(Record_flag[flag_pos]==1){
 					for(int i=0; i<window_size; i++)
-						window[wpos] +=  (float)pow(InputData[sample_count+i],2);
+						window[wpos] +=  (float)pow(InputData[sample_count+i],2);		// Energy of 6th audio window. It will be stored into window[wpos] in a cyclic manner
 					Record_flag[flag_pos] = 0;
 					flag_pos++;
-					if(flag_pos>=(50*ddr_buffer)){
+					if(flag_pos>=(ddr_buffer)){
 						flag_pos = 0;			
 					}
 					break;
@@ -70,35 +84,35 @@ void Keyword_Spotting()
 			sample_count = flag_pos*window_size;
 			wpos++;
 			if(wpos>5)
-				wpos=0;
+				wpos=0;			// window[wpos] becomes cyclic between 0-5 (six windows)
 			
 			window_energy=0;
 			for(int i=0; i<6; i++)
-				window_energy += window[i];		// store latest window energy
+				window_energy += window[i];		// Total energy of six consecutive windows
 
-			if(window_energy>silence_threshold){    // Voice detection
+			if(window_energy>silence_threshold){    // Voice window detection
 				one_count++;
 			}
 			else{
-				one_count=0;
+				one_count=0;			
 			}
 
-			if(one_count>4){
+			if(one_count>4){	// If five such continous voice windows are detected then it is treated as a true voice
 				one_count=0;
 				if(sample_count>=(11*window_size))
-					cut_start = sample_count-(11*window_size);
+					Voice_start = sample_count-(11*window_size);		// Voice starting point = present sample count - (5+6) windows // Five such 6 consecutive windows  
 				else
-					cut_start = 0;
+					Voice_start = 0;
 				break;
 			}
 		}
 		
-		for(int i=0; i<37 ; i++){ // (37+11)*341 > 16000
+		for(int i=0; i<37 ; i++){ 			// (37+11)*341 > 16000. Once voice is detected we are skipping window energy calulation untill next 1 sec. 
 			while(1){ // 			
 			   if(Record_flag[flag_pos]==true){
 					Record_flag[flag_pos] = false;
 					flag_pos++;
-					if(flag_pos>=(50*ddr_buffer)){
+					if(flag_pos>=(ddr_buffer)){	
 						flag_pos = 0;			
 					}
 					break;
@@ -106,15 +120,15 @@ void Keyword_Spotting()
 				this_thread::sleep_for(chrono::milliseconds(5) );			   
 			}
 		}
-		sample_count = flag_pos*window_size; // 25
+		sample_count = flag_pos*window_size; 
 		
-		cut_end = sample_count;
+		Voice_end = sample_count;
 		
-		if (cut_end > cut_start)
-			memcpy(InputChunk, InputData+cut_start, 16000);
+		if (Voice_end > Voice_start)
+			memcpy(InputChunk, InputData+Voice_start, 16000);		// After a voice detection, Copying the next 1 sec data directly to InputChunk
 		else{
-			memcpy(InputChunk, InputData+cut_start, (ddr_buffer*50*window_size-cut_start));
-			memcpy(InputChunk+(ddr_buffer*50*window_size-cut_start), InputData, 16000-(ddr_buffer*50*window_size-cut_start));
+			memcpy(InputChunk, InputData+Voice_start, (ddr_buffer*window_size-Voice_start));		// If the voice is detected at the edge of audio memory buffer
+			memcpy(InputChunk+(ddr_buffer*window_size-Voice_start), InputData, 16000-(ddr_buffer*window_size-Voice_start));
 		}
 
 		KWS_DS_CNN kws(InputChunk);

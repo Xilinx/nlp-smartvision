@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx Inc.
+ * Copyright 2021 Xilinx Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include <string>
+#include <glog/logging.h>
 
 void process_result_facedetect(cv::Mat *m1, const vitis::ai::FaceDetectResult &result,
                        bool is_jpeg, long int time, int thickness, bool left, bool right, int green, int blue, int red) {
   for (const auto &r : result.rects) {
-    // LOG_IF(INFO, is_jpeg) << " " << r.score << " " //
-    //                       << r.x << " "            //
-    //                       << r.y << " "            //
-    //                       << r.width << " "        //
-    //                       << r.height;
+    LOG_IF(INFO, is_jpeg) << " " << r.score << " " //
+                           << r.x << " "            //
+                           << r.y << " "            //
+                           << r.width << " "        //
+                           << r.height;
 
 
 	  if (left==false && right==false){

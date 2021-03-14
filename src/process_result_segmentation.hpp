@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx Inc.
+ * Copyright 2021 Xilinx Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ 
 #pragma once
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
+
 static cv::Mat process_result_segmentation(cv::Mat &m1,
                               const vitis::ai::SegmentationResult &result,
                               bool is_jpeg, bool left, bool right, bool top, bool bottom) {
