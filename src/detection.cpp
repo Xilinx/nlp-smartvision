@@ -38,6 +38,7 @@
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
+#include <signal.h> 
 #include"global_var.h"
 
 extern cv::VideoCapture input;
@@ -46,8 +47,20 @@ extern pthread_t thread_id1;
 extern cv::Mat cur_frame, process_frame, process_frame2;
 extern sem_t sem;
 
+void sigintHandler(int sig_num) 
+{ 
+    /* Reset handler to catch SIGINT next time. */
+    signal(SIGINT, sigintHandler); 
+    system("rm -rf /usr/share/vitis_ai_library/models 2>/dev/null");
+    system("mv /usr/share/vitis_ai_library/models_backup /usr/share/vitis_ai_library/models 2>/dev/null");
+    exit(1); 
+} 
+
 void Detection()
 {
+	system("mkdir /usr/share/vitis_ai_library 2>/dev/null");	
+	system("mv /usr/share/vitis_ai_library/models /usr/share/vitis_ai_library/models_backup 2>/dev/null");
+	system("ln -s /opt/xilinx/share/vitis_ai_library/models /usr/share/vitis_ai_library/ --force");
 	auto ml_task = vitis::ai::FaceDetect::create("densebox_640_360");
 	auto ml_task_1 = vitis::ai::YOLOv2::create("yolov2_voc_pruned_0_77");
 	auto ml_task_2 = vitis::ai::PlateDetect::create("plate_detect");
@@ -58,6 +71,7 @@ void Detection()
 	//auto t_now = std::chrono::steady_clock::now();
 	auto t_1 = std::chrono::steady_clock::now();
 	auto t_2 = std::chrono::steady_clock::now();
+	signal(SIGINT, sigintHandler); 
 	while (true)
 	{
 		t_1 = std::chrono::steady_clock::now();
