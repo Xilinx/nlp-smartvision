@@ -9,10 +9,10 @@
    1) Install the SoM sdk.sh to the path you choose or default. Suppose SDKPATH.
    2) Run "./build.sh ${SDKPATH}" to build the somapp application.
    3) The build process in 2) will produce a rpm package kws_aa-1.0.1-1.aarch64.rpm under build/, upload to the board,
-      and run "rpm -ivh --force ./kws_aa-1.0.1-1.aarch64.rpm" to update install.
+      and run "rpm -ivh --force ./nlp_smartvision-1.0.1-1.aarch64.rpm" to update install.
 
 The following file outlines the file structure and instructions on how to use
-the kws application. This file outlines the HW requirements for the application,
+the nlp_smartvision application. This file outlines the HW requirements for the application,
 how to run the application, and an overview of the application file structure. 
 
 1. How to run the example application:
