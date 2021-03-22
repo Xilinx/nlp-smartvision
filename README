@@ -94,6 +94,6 @@ how to run the application, and an overview of the application file structure.
                                         rgb_mipi-dp.sh        Initialized all media IPs and starts running RGB MIPI-DP pipeline at 1920x1080/30FPS
                                        
 
-    Jupyter notebook file:  => /usr/share/notebooks/kws_aa
-                                        kws_aa.ipynb              Jupyter notebook file for running demo.
+    Jupyter notebook file:  => /usr/share/notebooks/nlp_smartvision
+                                        nlp_smartvision.ipynb              Jupyter notebook file for running demo.
 
