@@ -48,9 +48,9 @@ extern sem_t sem;
 
 void Detection()
 {
-	auto ml_task = vitis::ai::FaceDetect::create("densebox_640_360");
-	auto ml_task_1 = vitis::ai::YOLOv2::create("yolov2_voc_pruned_0_77");
-	auto ml_task_2 = vitis::ai::PlateDetect::create("plate_detect");
+	auto ml_task = vitis::ai::FaceDetect::create("/opt/xilinx/share/vitis_ai_library/models/densebox/densebox.xmodel");
+	auto ml_task_1 = vitis::ai::YOLOv2::create("/opt/xilinx/share/vitis_ai_library/models/yolov2_voc_pruned_0_77/yolov2_voc_pruned_0_77.xmodel");
+	auto ml_task_2 = vitis::ai::PlateDetect::create("/opt/xilinx/share/vitis_ai_library/models/plate_detect/plate_detect.xmodel");
 	//auto ml_task_3 = vitis::ai::Segmentation8UC3::create("FPN-resnet18_Endov");
 	//auto ml_task_4 = vitis::ai::RoadLine::create("vpgnet_pruned_0_99");
 	//	    std:: cout << "created" << std::endl;
