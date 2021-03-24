@@ -109,6 +109,6 @@ for that purpose.
 | | | | | |
 | - | - | - | - | - |
 |Directory / File Name | Original Source | License Type | Link to License | Commit ID |
-| CMSIS | [Github Link](https://github.com/ARM-software/CMSIS_5) | Apache License 2.0 | [Link](https://github.com/ARM-software/CMSIS_5/blob/develop/LICENSE.txt) | a65b7c9a3e6502127fdb80eb288d8cbdf251a6f4 |
-| Hello_edge/src | [Github Link](https://github.com/ARM-software/ML-KWS-for-MCU) | Apache License 2.0 | [Link](https://github.com/ARM-software/ML-KWS-for-MCU/blob/master/LICENSE) | 8151349b110f4d1c194c085fcc5b3535bdf7ce4a |
-| src/aplay.cpp <br> src/include/aconfig.h <br> src/include/getetxt.h | [Github Link](https://github.com/alsa-project/alsa-utils) | GNU GPL v2.0 | [Link](https://github.com/alsa-project/alsa-utils/blob/master/COPYING) | b2ae0b074669f976c53a52bcd0129227321f88c9 |
+| CMSIS | [Github Link](https://github.com/ARM-software/CMSIS_5/tree/a65b7c9a3e6502127fdb80eb288d8cbdf251a6f4) | Apache License 2.0 | [Link](https://github.com/ARM-software/CMSIS_5/blob/a65b7c9a3e6502127fdb80eb288d8cbdf251a6f4/LICENSE.txt) | a65b7c9a3e6502127fdb80eb288d8cbdf251a6f4 |
+| Hello_edge/src | [Github Link](https://github.com/ARM-software/ML-KWS-for-MCU/tree/8151349b110f4d1c194c085fcc5b3535bdf7ce4a) | Apache License 2.0 | [Link](https://github.com/ARM-software/ML-KWS-for-MCU/blob/8151349b110f4d1c194c085fcc5b3535bdf7ce4a/LICENSE) | 8151349b110f4d1c194c085fcc5b3535bdf7ce4a |
+| src/aplay.cpp <br> src/include/aconfig.h <br> src/include/getetxt.h | [Github Link](https://github.com/alsa-project/alsa-utils/tree/b2ae0b074669f976c53a52bcd0129227321f88c9) | GNU GPL v2.0 | [Link](https://github.com/alsa-project/alsa-utils/blob/b2ae0b074669f976c53a52bcd0129227321f88c9/COPYING) | b2ae0b074669f976c53a52bcd0129227321f88c9 |
