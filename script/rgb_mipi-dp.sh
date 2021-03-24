@@ -14,6 +14,6 @@
 # limitations under the License.
 #
 
-gst-launch-1.0 mediasrcbin media-device=/dev/media0 v4l2src0::io-mode=5 ! "video/x-raw, width=1920, height=1080, format=RGB, framerate=30/1" ! kmssink driver-name=xlnx plane-id=39 fullscreen-overlay=true sync=false -v
+gst-launch-1.0 mediasrcbin media-device=/dev/media0 v4l2src0::io-mode=5 ! "video/x-raw, width=1024, height=768, format=RGB, framerate=30/1" ! kmssink driver-name=xlnx plane-id=39 fullscreen-overlay=true sync=false -v
 
 

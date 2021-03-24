@@ -39,15 +39,21 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include"global_var.h"
+//Initialisation of capture, drm, ml and thread related
+#define HSIZE 1024
+#define VSIZE 768
+/* 
+cv::VideoCapture input;
+cv::VideoWriter output; 
+*/
 
-extern cv::VideoCapture input;
-extern cv::VideoWriter output;
-extern pthread_t thread_id1;
-extern cv::Mat cur_frame, process_frame, process_frame2;
-extern sem_t sem;
+cv::Mat cur_frame;
 
 void Detection()
 {
+	cv::VideoCapture input("v4l2src ! video/x-raw, width=1024, height=768 ! appsink", cv::CAP_GSTREAMER);
+	cv::VideoWriter output("appsrc ! kmssink driver-name=xlnx plane-id=39 fullscreen-overlay=true sync=false -v", cv::VideoWriter::fourcc('R', 'X', '2', '4'), 30.0, cv::Size(HSIZE,VSIZE), true);
+
 	auto ml_task = vitis::ai::FaceDetect::create("/opt/xilinx/share/vitis_ai_library/models/densebox/densebox.xmodel");
 	auto ml_task_1 = vitis::ai::YOLOv2::create("/opt/xilinx/share/vitis_ai_library/models/yolov2_voc_pruned_0_77/yolov2_voc_pruned_0_77.xmodel");
 	auto ml_task_2 = vitis::ai::PlateDetect::create("/opt/xilinx/share/vitis_ai_library/models/plate_detect/plate_detect.xmodel");
@@ -65,7 +71,7 @@ void Detection()
 		t_2 = t_1;
 		t_1 = std::chrono::steady_clock::now();
 
-		//input.read(cur_frame);
+		input.read(cur_frame);
 		switch (model)
 		{
 		case 0:
@@ -128,7 +134,7 @@ void Detection()
 		
 		//The getMat function lags the active/queued buffer by 4 frames
 		//usleep(1000);
-		output.write(process_frame);
+		output.write(cur_frame);
 		//t_2 = std::chrono::steady_clock::now();
 		//auto d_milli_1 = std::chrono::duration_cast<std::chrono::milliseconds>( t_2 - t_1 ).count();
 		//cout << "latency in milli sec is: " << d_milli << "frame rate is: " << 1000/d_milli << std::endl;

@@ -33,14 +33,7 @@
 using namespace std;
 using namespace std::chrono;
 
-//Initialisation of capture, drm, ml and thread related
-#define HSIZE 1920
-#define VSIZE 1080
-cv::VideoCapture input("v4l2src ! video/x-raw, width=1920, height=1080 ! appsink", cv::CAP_GSTREAMER);
-cv::VideoWriter output("appsrc ! kmssink driver-name=xlnx plane-id=39 fullscreen-overlay=true sync=false -v", cv::VideoWriter::fourcc('R', 'X', '2', '4'), 30.0, cv::Size(HSIZE,VSIZE), true);
-pthread_t thread_id1;
-cv::Mat cur_frame, process_frame, process_frame2;
-sem_t sem;
+
 
 int window_size = 341;		// Window size supported by PCM sound card
 int ddr_buffer = 15000;		//To allocate memory that can store 15000 audio windows each of size 341
@@ -65,33 +58,12 @@ void Keyword_Spotting();	//Function to do kewyword spotting
 void Detection();			//function to perform the Vision Task
 void Capture_Audio();		//Function to capture audio continuously
 
-
-void* Capture_Video(void)	//To support multithreading in video capture
-{
-  while(1)
-  {
-    input.read(cur_frame);
-    process_frame = cur_frame.clone();
-    sem_post(&sem);
-  }
-   pthread_exit(NULL);
-}
-
-
 int main()
 {
-	
-	sem_init(&sem, 0, 0);
-
-	#ifdef ENABLE_NLS
+		#ifdef ENABLE_NLS
 		setlocale(LC_ALL, "");
 		textdomain(PACKAGE);
 	#endif
-
-	if(pthread_create(&thread_id1, NULL, Capture_Video, NULL) != 0)
-	{
-		printf("Failed to create thread\n");
-	}
 
 	thread CA(Capture_Audio); 			//Start Capturing audio data
 	thread KWS(Keyword_Spotting);		//Start Detecting the keyword
