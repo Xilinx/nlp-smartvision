@@ -54,9 +54,9 @@ void Detection()
 	cv::VideoCapture input("v4l2src ! video/x-raw, width=1024, height=768 ! appsink", cv::CAP_GSTREAMER);
 	cv::VideoWriter output("appsrc ! kmssink driver-name=xlnx plane-id=39 fullscreen-overlay=true sync=false -v", cv::VideoWriter::fourcc('R', 'X', '2', '4'), 30.0, cv::Size(HSIZE,VSIZE), true);
 
-	auto ml_task = vitis::ai::FaceDetect::create("/opt/xilinx/share/vitis_ai_library/models/densebox/densebox.xmodel");
-	auto ml_task_1 = vitis::ai::YOLOv2::create("/opt/xilinx/share/vitis_ai_library/models/yolov2_voc_pruned_0_77/yolov2_voc_pruned_0_77.xmodel");
-	auto ml_task_2 = vitis::ai::PlateDetect::create("/opt/xilinx/share/vitis_ai_library/models/plate_detect/plate_detect.xmodel");
+	auto ml_task = vitis::ai::FaceDetect::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/densebox_640_360/densebox_640_360.xmodel");
+	auto ml_task_1 = vitis::ai::YOLOv2::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/yolov2_voc_pruned_0_77/yolov2_voc_pruned_0_77.xmodel");
+	auto ml_task_2 = vitis::ai::PlateDetect::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/plate_detect/plate_detect.xmodel");
 	//auto ml_task_3 = vitis::ai::Segmentation8UC3::create("FPN-resnet18_Endov");
 	//auto ml_task_4 = vitis::ai::RoadLine::create("vpgnet_pruned_0_99");
 	//	    std:: cout << "created" << std::endl;
