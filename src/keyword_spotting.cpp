@@ -16,9 +16,9 @@
  
 #include "kws_ds_cnn.h"
 #include<thread>
+#include <fstream>
+#include <iostream>
 #include<memory>
-#include<pthread.h>
-#include <semaphore.h>
 #include <glog/logging.h>
 #include <chrono>
 #include <stdio.h>
@@ -144,40 +144,36 @@ void Keyword_Spotting()
 		switch (max_ind)
 		{
 
-		case 2:
+		case 2:	//yes
 			bbox_disp = true;
 			printf("Keyword Detected : \"Yes\" \t Task : Display Bounding Box / Segmented Pixels \n");
-			break; //yes -> Display Bounding Box
-		case 3:
+			break;  
+		case 3: //no
 			bbox_disp = false;
 			printf("Keyword Detected : \"No\" \t Task : Do Not Display Bounding Box/ Segmented Pixels \n");
-			break; //no -> DO not display Bounding Box
+			break;  
 		case 4: //up
 			model = model + 1; 
 			model = model % num_model;
 			printf("Keyword Detected : \"Up\" \t Task : Switched to %s \n", Tasks[model]);
-			//print_model  = true;
-			//printf("\n");
-			break; //up   -> change to next model
+			break; 
 		case 5: //down
 			model = model - 1;
 			model = model % num_model;
 			if (model<0){ model = model +num_model;}
 			printf("Keyword Detected : \"Down\" \t Task : Switched to %s \n", Tasks[model]);
-			//print_model  = true;
-			//printf("\n");
-			break; //down -> change to previous model
-		case 6:
+			break; 
+		case 6: //left
 			dleft = true;
 			dright = false;
 			printf("Keyword Detected : \"Left\" \t Task : Display Processed Result for only left side of screen\n");
-			break; //left  -> show bounding boxes only in left of the screen;
-		case 7:
+			break; 
+		case 7: //right
 			dright = true;
 			dleft = false;
 			printf("Keyword Detected : \"Right\" \t Task : Display Processed Result for only Right side of screen\n");
-			break; //right -> show bounding boxes only in right of the screen;
-		case 10:
+			break; 
+		case 10: //stop
 			bbox_disp = true;
 			bbox_thick = 2;
 			dleft = false;
@@ -188,8 +184,8 @@ void Keyword_Spotting()
 			top = false;
 			bottom = false;
 			printf("Keyword Detected : \"Stop\" \t Task : Stop Current Settings And reset to Default\n");
-			break; //stop  -> reset to defaults;
-		case 11:
+			break; 
+		case 11: //go
 			
 			if(model==3){
 				if (top==false && bottom==false){
@@ -211,13 +207,13 @@ void Keyword_Spotting()
 			green = temp;
 			printf("Keyword Detected : \"Go\" \t Task : Toggle Bounding Box Color B -> R -> G \n");
 			}
-			break; //go -> Change colors
-		case 8:	   //on -> Switch On display on Monitor
+			break; 
+		case 8:	   //on 
 			snprintf(command, sizeof(command), "modetest -M xlnx -D fd4a0000.zynqmp-display -w 40:alpha:0");
 			printf("Keyword Detected : \"On\" \t Task : Switch On Monitor Display\n");
 			system(command);
 			break;
-		case 9: //off -> Switch off the Display on Monitor
+		case 9: //off 
 			snprintf(command, sizeof(command), "modetest -M xlnx -D fd4a0000.zynqmp-display -w 40:alpha:255");
 			printf("Keyword Detected : \"Off\" \t Task : Switch Off Monitor Display\n");
 			system(command);
@@ -226,3 +222,111 @@ void Keyword_Spotting()
 	}
 }
 
+void Keyword_Spotting_Debug(char *testfile)
+{
+	char command[256];
+	//char output_class[12][8] = {"Silence", "Unknown", "yes", "no", "up", "down", "left", "right", "on", "off", "stop", "go"};
+	string Actual_Keyword;
+	string Detected_Keyword;
+	short InputChunk[16000]; // Audio Input samples are in signed int16 precision
+	string FileName;
+	int file_count = 0;
+	int detect_count = 0;
+	FILE *fp;
+	
+	ifstream infile;
+	infile.open (testfile);
+	if(!infile){
+		cout << endl;
+		cout << "Exception opening/reading the file " << testfile << endl << endl;
+		return;
+	}
+	else{
+		while(getline(infile, FileName))
+		{	FileName.pop_back();
+			fp = fopen(FileName.c_str(), "rb");
+			if(fp == NULL){
+				printf("\nException opening/reading the audio file %s \n",FileName.c_str());
+				printf("Excepted way of storing the audio file names in %s file is keyword/audio_filename.wav \n\n",testfile);
+				return;
+			}
+			fread(&InputChunk[0],sizeof(short),16000,fp);  // Read the audio data
+			fclose(fp);
+			
+			file_count++;
+			Actual_Keyword = "";
+			
+			for(unsigned int i=0; i < strlen(FileName.c_str()); i++){
+				if(FileName[i] != '/'){
+					Actual_Keyword = Actual_Keyword + FileName[i];
+				}
+				else{
+					break;
+				}
+			}
+			
+			cout << "Spoken : " << Actual_Keyword << "\t\t";
+			
+			KWS_DS_CNN kws(InputChunk);
+
+			kws.extract_features(); //extract mfcc features
+			kws.classify();			//classify using dnn
+			
+			int max_ind = kws.get_top_class(kws.output);
+			int temp;
+			//		char output_class[12][8] = {"Silence", "Unknown","yes","no","up","down","left","right","on","off","stop","go"};
+			
+			switch (max_ind)
+			{
+			case 0:
+				Detected_Keyword = "silence";
+				break;
+			
+			case 1:
+				Detected_Keyword = "unknown";
+				break;
+
+			case 2:
+				Detected_Keyword = "yes";
+				break; 
+			case 3:
+				Detected_Keyword = "no";
+				break; 
+			case 4: 
+				Detected_Keyword = "up";
+				break; 
+			case 5: 
+				Detected_Keyword = "down";
+				break; 
+			case 6:
+				Detected_Keyword = "left";
+				break; 
+			case 7:
+				Detected_Keyword = "right";
+				break; 
+			case 10:
+				Detected_Keyword = "stop";
+				break; 
+			case 11:
+				Detected_Keyword = "go";
+				break; 
+			case 8:	   
+				Detected_Keyword = "on";
+				break;
+			case 9: 
+				Detected_Keyword = "off";
+				break;
+			}
+			cout << "Detected : " << Detected_Keyword << endl;
+			if(strcmp(Actual_Keyword.c_str(),Detected_Keyword.c_str())==0){
+				detect_count++;
+			}
+		}
+		infile.close();
+	  
+	cout<< "=========================================" << endl;
+	cout << "Number of keywords tested = " << file_count << endl;
+	cout << "Number of keywords detected correctly = " << detect_count << endl;
+	cout << "Accuracy = " << ((float)detect_count / (float)file_count)*100 << "%" << endl << endl; 
+	}
+}

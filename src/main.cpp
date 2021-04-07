@@ -19,10 +19,10 @@
 #include <cstring>
 #include <chrono>
 #include <thread>
-#include <pthread.h>
-#include <semaphore.h>
+#include <getopt.h>
 #include <glog/logging.h>
 #include <iostream>
+#include <fstream>
 #include <memory>
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
@@ -55,23 +55,61 @@ bool bottom = false;		//Default state to process output for complete screen; bot
 
 
 void Keyword_Spotting();	//Function to do kewyword spotting
+void Keyword_Spotting_Debug(char *testfile); //Function to test kewyword spotting
 void Detection();			//function to perform the Vision Task
 void Capture_Audio();		//Function to capture audio continuously
 
-int main()
-{
-		#ifdef ENABLE_NLS
-		setlocale(LC_ALL, "");
-		textdomain(PACKAGE);
-	#endif
+static void usage(char *command){
+	printf(("\n"
+	"Usage: %s [OPTION] [FILE]\n"
+	"\n"
+	"-h (or) --help                               help\n"
+	"-l (or) --live-audio                         test the application with live audio input\n"
+	"-f (or) --file-audio  <testing_list>.txt     test the keyword spotting with audio files listed in the .txt file\n"
+	"\n"
+	  ), command);
+}
 
-	thread CA(Capture_Audio); 			//Start Capturing audio data
-	thread KWS(Keyword_Spotting);		//Start Detecting the keyword
-	thread FD(Detection);				//Start Processing of Vision Task
+int main(int argc, char *argv[])
+{	
+	char *command = argv[0];
+	int option_index, c;
+	static const char short_options[] = "hlf:";
+	static const struct option long_options[] = {
+		{"help", 0, 0, 'h'},
+		{"live-audio", 0, 0, 'l'},
+		{"file-audio", 1, 0, 'f'},
+		{0, 0, 0, 0}
+	};
 	
-	CA.join();
-	KWS.join();
-	FD.join();
-
-	return 0;
+	if (argc == 1) {
+		usage(command);  	// print the usage of application
+		return 1;
+	}
+	
+	while ((c = getopt_long(argc, argv, short_options, long_options, &option_index)) != -1) {
+		switch (c) {
+		case 'h':
+			usage(command);			// print the usage of application
+			return 1;
+		case 'l':
+			{
+			thread CA(Capture_Audio); 			//Start Capturing audio in live
+			thread KWS(Keyword_Spotting);		//Start Detecting the keyword
+			thread FD(Detection);				//Start Processing of Vision Task
+			CA.join();
+			KWS.join();
+			FD.join();
+			break;
+			}
+		case 'f':
+			Keyword_Spotting_Debug(optarg);		//Testing of keyword spotting algorithm using .wav audio files
+			break;
+		default:
+			printf(("Try `%s --help' for more information.\n\n"), command);
+			return 1;
+		}
+	}
+	
+	return 1;
 }
