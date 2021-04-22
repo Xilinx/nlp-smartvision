@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 {	
 	char *command = argv[0];
 	int option_index, c;
-	static const char short_options[] = "hlft:";
+	static const char short_options[] = "hlftp:";
 	static const struct option long_options[] = {
 		{"help", 0, 0, 'h'},
 		{"live-audio", 0, 0, 'l'},
@@ -100,11 +100,12 @@ int main(int argc, char *argv[])
 		case 'l':
 			{
 			if(argc > 2 ) {
-				if (strcmp ("-p", argv[2]) == 0){
+				if ( (strcmp ("-p", argv[2]) == 0 ) || (strcmp ("--print", argv[2]) == 0) ){
 					fps = true;
 				}
 				else {
 					printf(("Try `%s --help' for more information.\n\n"), command); 
+					usage(command);
 					return 1;
 				}
 			}
@@ -120,10 +121,15 @@ int main(int argc, char *argv[])
 			Keyword_Spotting_Debug(optarg);		//Testing of keyword spotting algorithm using .wav audio files
 			break;
 		case 't':
+			if(argc != 4 ) { 
+				printf(("Try `%s --help' for more information.\n\n"), command);
+				usage(command);
+				return 1;
+			}
 			test_models(argv[2], argv[3]);
 			break;
 		default:
-			printf(("Try `%s --help' for more information.\n\n"), command);
+			printf(("Try `%s --help' for more information.\n\n"), command);	
 			return 1;
 		}
 	}

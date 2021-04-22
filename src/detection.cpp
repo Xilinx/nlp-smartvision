@@ -38,20 +38,78 @@
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
+#include <glob.h>
+#include <stdio.h>
+#include <gst/gst.h>
+#include <string>
+#include <array>
+#include <vector>
+#include <sstream>
+#include <memory>
+#include <stdexcept>
+#include <unistd.h>
+#include <sys/types.h>
+
 #include"global_var.h"
+static std::string mipidev("");
+static char *msgFirmware = (char *)"Please make sure that the HW accelerator firmware is loaded via xmutil loadapp kv260-smartcam.\n";
+	
 //Initialisation of capture, drm, ml and thread related
 #define HSIZE 1024
 #define VSIZE 768
-/* 
-cv::VideoCapture input;
-cv::VideoWriter output; 
-*/
+static std::string exec(const char* cmd) {
+	    std::array<char, 128> buffer;
+	    std::string result;
+	    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
+	    if (!pipe) {
+		throw std::runtime_error("popen() failed!");
+	    }
+	    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+		result += buffer.data();
+	    }
+	    return result;
+	}
 
 cv::Mat cur_frame;
 
 void Detection()
 {
-	cv::VideoCapture input("v4l2src ! video/x-raw, width=1024, height=768 ! appsink", cv::CAP_GSTREAMER);
+    	glob_t globbuf;
+	std::cout << "finding mipi video node: " ;
+    	std::string dev("");
+  	glob("/dev/video*", 0, NULL, &globbuf);
+    	for (int i = 0; i < globbuf.gl_pathc; i++)
+    	{
+        	std::ostringstream cmd;
+        	cmd << "v4l2-ctl -d " << globbuf.gl_pathv[i] << " --all | grep Driver | grep name | grep xilinx-video | wc -l";
+       		std::string a = exec(cmd.str().c_str());
+		a=a.substr(0, a.find("\n"));
+		if ( a == std::string("1") )
+		{
+		    dev = globbuf.gl_pathv[i];
+		    break;
+		}
+	}
+	globfree(&globbuf);
+	std::string FindMIPIDev = dev;
+	std::cout << FindMIPIDev << std::endl;
+
+	mipidev = FindMIPIDev;
+	if (mipidev == "")
+	    {
+		g_printerr("ERROR: MIPI device is not ready.\n%s", msgFirmware);
+		return 1;
+	    }
+	    if ( access( mipidev.c_str(), F_OK ) != 0 )
+	    {
+		g_printerr("ERROR: Device %s is not ready.\n%s", mipidev.c_str(), msgFirmware);
+		return 1;
+	}
+	char pip[2500];
+    	pip[0] = '\0';
+	sprintf(pip + strlen(pip), "v4l2src device=%s ! video/x-raw, width=1024, height=768 ! appsink ", mipidev.c_str());
+	// std::cout << pip << std::endl;
+	cv::VideoCapture input(pip , cv::CAP_GSTREAMER);
 	cv::VideoWriter output("appsrc ! kmssink driver-name=xlnx plane-id=39 fullscreen-overlay=true sync=false -v", cv::VideoWriter::fourcc('R', 'X', '2', '4'), 30.0, cv::Size(HSIZE,VSIZE), true);
 
 	auto ml_task = vitis::ai::FaceDetect::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/densebox_640_360/densebox_640_360.xmodel");
@@ -70,7 +128,7 @@ void Detection()
 		if (cur_frame.empty())
 		{
 			std::cout << "!!! Failed to read frame. please run rgb-mipi-dp.sh to initialize videopipeline" << std::endl;
-			return;
+			return 0;
 			// don't let the execution continue, else application may crash.
 		}
 		switch (model)

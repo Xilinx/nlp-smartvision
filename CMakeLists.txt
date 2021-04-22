@@ -19,11 +19,12 @@ cmake_minimum_required(VERSION 3.5)
 project(nlp_sv)
 
 SET(CMAKE_INSTALL_PREFIX $ENV{OECORE_TARGET_SYSROOT})
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__USE_XOPEN2K8 -DENABLE_PRECOMPILED_HEADERS=OFF -g -Wall -O2 -fpermissive -fmessage-length=0 -rdynamic -Wl,--no-undefined" )
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__USE_XOPEN2K8 -DENABLE_PRECOMPILED_HEADERS=OFF -g -Wall -O2 -fpermissive -fmessage-length=0 -rdynamic -Wl,--no-undefined -Wno-narrowing" )
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -std=c++14")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I ${CMAKE_SOURCE_DIR}/src/")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+find_package(GStreamer REQUIRED)
 find_package(OpenCV REQUIRED)
 #find_package(alsa-lib REQUIRED)
 
@@ -55,6 +56,7 @@ install(TARGETS hello_edge DESTINATION ${INSTALL_PATH}/lib)
 # build the executable 
 add_executable(nlp_sv src/main.cpp src/detection.cpp src/keyword_spotting.cpp src/aplay.cpp)
 target_include_directories(nlp_sv PRIVATE ${OpenCV_INCLUDE_DIRS})
+target_include_directories(nlp_sv PRIVATE ${GSTREAMER_INCLUDE_DIRS})
 target_include_directories(nlp_sv PRIVATE ${CMAKE_SOURCE_DIR}/acapture/src)
 target_include_directories(nlp_sv PRIVATE ${CMAKE_SOURCE_DIR}/src/Include)
 target_include_directories(nlp_sv PRIVATE ${CMAKE_SOURCE_DIR}/Hello_edge/src)
@@ -68,7 +70,8 @@ include_directories(${CMAKE_SOURCE_DIR}/script)
 
 
 target_link_libraries(nlp_sv
-  xilinxopencl pthread rt dl crypt stdc++ asound CMSIS hello_edge opencv_core opencv_video opencv_videoio opencv_imgproc opencv_imgcodecs opencv_highgui vitis_ai_library-yolov2 vitis_ai_library-facedetect vitis_ai_library-platedetect vitis_ai_library-lanedetect vitis_ai_library-segmentation glog )
+  xilinxopencl pthread rt dl crypt stdc++ asound CMSIS hello_edge opencv_core opencv_video opencv_videoio opencv_imgproc opencv_imgcodecs opencv_highgui vitis_ai_library-yolov2 vitis_ai_library-facedetect vitis_ai_library-platedetect vitis_ai_library-lanedetect vitis_ai_library-segmentation glog gstapp-1.0 gstreamer-1.0 gstbase-1.0 gobject-2.0 glib-2.0 gstvideo-1.0 gstallocators-1.0 gstrtsp-1.0 gstrtspserver-1.0
+  glib-2.0 gobject-2.0)
 install(TARGETS nlp_sv DESTINATION ${INSTALL_PATH}/bin)
 
 install(PROGRAMS
