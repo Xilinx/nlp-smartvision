@@ -56,16 +56,18 @@ bool bottom = false;		//Default state to process output for complete screen; bot
 
 void Keyword_Spotting();	//Function to do kewyword spotting
 void Keyword_Spotting_Debug(char *testfile); //Function to test kewyword spotting
+void test_models(char *file, char* aitask);
 void Detection();			//function to perform the Vision Task
 void Capture_Audio();		//Function to capture audio continuously
 
 static void usage(char *command){
 	printf(("\n"
-	"Usage: %s [OPTION] [FILE]\n"
+	"Usage: %s [OPTION] [arg1] [arg2]\n"
 	"\n"
 	"-h (or) --help                               help\n"
 	"-l (or) --live-audio                         test the application with live audio input\n"
 	"-f (or) --file-audio  <testing_list>.txt     test the keyword spotting with audio files listed in the .txt file\n"
+	"-t (or) --test <sample_image> <model>        test the DPU with sample images. Input is Model and sample jpeg\n"
 	"\n"
 	  ), command);
 }
@@ -74,15 +76,16 @@ int main(int argc, char *argv[])
 {	
 	char *command = argv[0];
 	int option_index, c;
-	static const char short_options[] = "hlf:";
+	static const char short_options[] = "hlft:";
 	static const struct option long_options[] = {
 		{"help", 0, 0, 'h'},
 		{"live-audio", 0, 0, 'l'},
 		{"file-audio", 1, 0, 'f'},
+		{"test", 0, 0, 't'},
 		{0, 0, 0, 0}
 	};
 	
-	if (argc == 1) {
+	if (argc == 1 || argc > 4) {
 		usage(command);  	// print the usage of application
 		return 1;
 	}
@@ -104,6 +107,9 @@ int main(int argc, char *argv[])
 			}
 		case 'f':
 			Keyword_Spotting_Debug(optarg);		//Testing of keyword spotting algorithm using .wav audio files
+			break;
+		case 't':
+			test_models(argv[2], argv[3]);
 			break;
 		default:
 			printf(("Try `%s --help' for more information.\n\n"), command);
