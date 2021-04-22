@@ -143,7 +143,9 @@ void Keyword_Spotting()
 		
 		switch (max_ind)
 		{
-
+		case 1: //unknown keyword
+			printf("Unknown Keyword \n");
+			break;
 		case 2:	//yes
 			bbox_disp = true;
 			printf("Keyword Detected : \"Yes\" \t Task : Display Bounding Box / Segmented Pixels \n");
@@ -243,7 +245,11 @@ void Keyword_Spotting_Debug(char *testfile)
 	}
 	else{
 		while(getline(infile, FileName))
-		{	FileName.pop_back();
+		{	
+			if(FileName.back() == '\n' || FileName.back() == '\r'){ // removing the last end line character
+				FileName.pop_back();
+			}
+
 			fp = fopen(FileName.c_str(), "rb");
 			if(fp == NULL){
 				printf("\nException opening/reading the audio file %s \n",FileName.c_str());
@@ -265,7 +271,7 @@ void Keyword_Spotting_Debug(char *testfile)
 				}
 			}
 			
-			cout << "Spoken : " << Actual_Keyword << "\t\t";
+			cout << "Ground truth : " << Actual_Keyword << "\t\t";
 			
 			KWS_DS_CNN kws(InputChunk);
 
@@ -317,7 +323,7 @@ void Keyword_Spotting_Debug(char *testfile)
 				Detected_Keyword = "off";
 				break;
 			}
-			cout << "Detected : " << Detected_Keyword << endl;
+			cout << "Prediction : " << Detected_Keyword << endl;
 			if(strcmp(Actual_Keyword.c_str(),Detected_Keyword.c_str())==0){
 				detect_count++;
 			}

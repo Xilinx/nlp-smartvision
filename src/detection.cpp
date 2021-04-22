@@ -78,7 +78,7 @@ void Detection()
 		case 0:
 		{	if (print_model == true ) {
 			print_model = false;
-			std:: cout << "facedetect" << std::endl;
+			std:: cout << "Facedetect Kernel Loaded" << std::endl;
 			}
 
 			auto res = ml_task->run(cur_frame);
@@ -91,7 +91,7 @@ void Detection()
 		case 1:
 		{ if (print_model ==true ) {
 			print_model = false;
-			std:: cout << "objectdetect" << std::endl;}
+			std:: cout << "Objectdetect Kernel Loaded" << std::endl;}
 			auto res1 = ml_task_1->run(cur_frame);
 			if (bbox_disp == true)
 			{
@@ -102,7 +102,7 @@ void Detection()
 		case 2:
 		{ if (print_model ==true ) {
 		print_model = false;
-		std:: cout << "platedetect" << std::endl;}
+		std:: cout << "Platedetect Kernel Loaded" << std::endl;}
 			auto res2 = ml_task_2->run(cur_frame);
 			if (bbox_disp == true)
 			{
