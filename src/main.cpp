@@ -52,7 +52,7 @@ int green = 0;
 int blue = 0;
 bool top = false;			//Default state to process output for complete screen; top=False
 bool bottom = false;		//Default state to process output for complete screen; bottom=False
-
+bool fps = false;
 
 void Keyword_Spotting();	//Function to do kewyword spotting
 void Keyword_Spotting_Debug(char *testfile); //Function to test kewyword spotting
@@ -68,6 +68,7 @@ static void usage(char *command){
 	"-l (or) --live-audio                         test the application with live audio input\n"
 	"-f (or) --file-audio  <testing_list>.txt     test the keyword spotting with audio files listed in the .txt file\n"
 	"-t (or) --test <sample_image> <model>        test the DPU with sample images. Input is Model and sample jpeg\n"
+	"-p (or) --print        use along with -l to print fps\n"
 	"\n"
 	  ), command);
 }
@@ -82,6 +83,7 @@ int main(int argc, char *argv[])
 		{"live-audio", 0, 0, 'l'},
 		{"file-audio", 1, 0, 'f'},
 		{"test", 0, 0, 't'},
+		{"print", 0, 0, 'p'},
 		{0, 0, 0, 0}
 	};
 	
@@ -97,6 +99,15 @@ int main(int argc, char *argv[])
 			return 1;
 		case 'l':
 			{
+			if(argc > 2 ) {
+				if (strcmp ("-p", argv[2]) == 0){
+					fps = true;
+				}
+				else {
+					printf(("Try `%s --help' for more information.\n\n"), command); 
+					return 1;
+				}
+			}
 			thread CA(Capture_Audio); 			//Start Capturing audio in live
 			thread KWS(Keyword_Spotting);		//Start Detecting the keyword
 			thread FD(Detection);				//Start Processing of Vision Task

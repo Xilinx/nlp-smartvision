@@ -34,5 +34,6 @@ extern int blue;
 extern bool top;
 extern bool bottom;
 extern int x[10];
+extern bool fps;
 
 #endif

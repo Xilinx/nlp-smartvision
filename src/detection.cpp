@@ -57,21 +57,22 @@ void Detection()
 	auto ml_task = vitis::ai::FaceDetect::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/densebox_640_360/densebox_640_360.xmodel");
 	auto ml_task_1 = vitis::ai::YOLOv2::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/yolov2_voc_pruned_0_77/yolov2_voc_pruned_0_77.xmodel");
 	auto ml_task_2 = vitis::ai::PlateDetect::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/plate_detect/plate_detect.xmodel");
-	//auto ml_task_3 = vitis::ai::Segmentation8UC3::create("FPN-resnet18_Endov");
-	//auto ml_task_4 = vitis::ai::RoadLine::create("vpgnet_pruned_0_99");
-	//	    std:: cout << "created" << std::endl;
-	//auto t_last = std::chrono::steady_clock::now();
-	//auto t_now = std::chrono::steady_clock::now();
 	auto t_1 = std::chrono::steady_clock::now();
 	auto t_2 = std::chrono::steady_clock::now();
+	int i = 0;
+	auto d_milli = std::chrono::duration_cast<std::chrono::milliseconds>( t_1 - t_1 ).count();
 	while (true)
 	{
+		if (fps) {
 		t_1 = std::chrono::steady_clock::now();
-		auto d_milli = std::chrono::duration_cast<std::chrono::milliseconds>(t_1 - t_2).count();
-		t_2 = t_1;
-		t_1 = std::chrono::steady_clock::now();
-
+		}
 		input.read(cur_frame);
+		if (cur_frame.empty())
+		{
+			std::cout << "!!! Failed to read frame. please run rgb-mipi-dp.sh to initialize videopipeline" << std::endl;
+			return;
+			// don't let the execution continue, else application may crash.
+		}
 		switch (model)
 		{
 		case 0:
@@ -84,7 +85,6 @@ void Detection()
 			if (bbox_disp == true)
 			{
 				process_result_facedetect(&cur_frame, res, false, d_milli, bbox_thick, dleft, dright, green, blue, red);
-				//process_result(&process_frame, res, false, d_milli);
 			}
 			break;
 		}
@@ -113,11 +113,17 @@ void Detection()
 		}
 		
 		//The getMat function lags the active/queued buffer by 4 frames
-		//usleep(1000);
 		output.write(cur_frame);
-		//t_2 = std::chrono::steady_clock::now();
-		//auto d_milli_1 = std::chrono::duration_cast<std::chrono::milliseconds>( t_2 - t_1 ).count();
-		//cout << "latency in milli sec is: " << d_milli << "frame rate is: " << 1000/d_milli << std::endl;
+		if (fps) {
+		i = i + 1;
+		t_2 = std::chrono::steady_clock::now();
+		d_milli = d_milli + std::chrono::duration_cast<std::chrono::milliseconds>( t_2 - t_1 ).count();
+		if (i >= 10){
+			std::cout << "...frame rate is: " << 10000/d_milli << std::endl;
+			i = 0;
+			d_milli = 0;
+		}
+		}
 	}
 }
 
@@ -131,19 +137,19 @@ void test_models(char *file, char* aitask){
 	}
 	
 	if(!strcmp(aitask, "densebox_640_360")) {
-		printf(("densebox.\n\n"));
+		// printf(("densebox.\n\n"));
 		auto ml_task = vitis::ai::FaceDetect::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/densebox_640_360/densebox_640_360.xmodel");
 		auto res = ml_task->run(I);
 		process_result_facedetect(&I, res, true, 0, bbox_thick, dleft, dright, green, blue, red);
 	}
 	else if (!strcmp(aitask, "yolov2_voc_pruned_0_77")) {
-		printf(("yolov2_voc_pruned_0_77.\n\n"));
+		// printf(("yolov2_voc_pruned_0_77.\n\n"));
 		auto ml_task = vitis::ai::YOLOv2::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/yolov2_voc_pruned_0_77/yolov2_voc_pruned_0_77.xmodel");
 		auto res = ml_task->run(I);
 		process_result_objectdetect(I, res, true, 0, bbox_thick, dleft, dright, green, blue, red);
 	}
 	else if (!strcmp(aitask, "plate_detect")) {
-		printf(("plate_detect.\n\n"));
+		// printf(("plate_detect.\n\n"));
 		auto ml_task = vitis::ai::PlateDetect::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/plate_detect/plate_detect.xmodel");
 		auto res = ml_task->run(I);
 		process_result_platedetect(I, res, true, 0, bbox_thick, dleft, dright, green, blue, red);
