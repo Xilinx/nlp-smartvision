@@ -70,7 +70,7 @@ include_directories(${CMAKE_SOURCE_DIR}/script)
 
 
 target_link_libraries(nlp_sv
-  xilinxopencl pthread rt dl crypt stdc++ asound CMSIS hello_edge opencv_core opencv_video opencv_videoio opencv_imgproc opencv_imgcodecs opencv_highgui vitis_ai_library-yolov2 vitis_ai_library-facedetect vitis_ai_library-platedetect vitis_ai_library-lanedetect vitis_ai_library-segmentation glog gstapp-1.0 gstreamer-1.0 gstbase-1.0 gobject-2.0 glib-2.0 gstvideo-1.0 gstallocators-1.0 gstrtsp-1.0 gstrtspserver-1.0
+  xilinxopencl pthread rt dl crypt stdc++ asound CMSIS hello_edge opencv_core opencv_video opencv_videoio opencv_imgproc opencv_imgcodecs opencv_highgui vitis_ai_library-yolov2 vitis_ai_library-facedetect vitis_ai_library-platedetect vitis_ai_library-lanedetect vitis_ai_library-segmentation glog gstapp-1.0 gstreamer-1.0 gstbase-1.0 gobject-2.0 glib-2.0 gstvideo-1.0 gstallocators-1.0 
   glib-2.0 gobject-2.0)
 install(TARGETS nlp_sv DESTINATION ${INSTALL_PATH}/bin)
 
