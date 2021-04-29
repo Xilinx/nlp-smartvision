@@ -42,6 +42,11 @@ void Keyword_Spotting()
     int one_count = 0;
     int flag_pos = 0;
 	short InputChunk[16000]; // Audio Input samples are in signed int16 precision
+	bool silence_flag = false;
+	
+	auto T1 = high_resolution_clock::now();
+	auto T2 = high_resolution_clock::now();
+	auto Time_taken = duration_cast<microseconds>(T2 - T1);
 
 	while(1){
 		
@@ -58,7 +63,9 @@ void Keyword_Spotting()
 					}
 					break;
 				}
+				else{
 				this_thread::sleep_for(chrono::milliseconds(5) );	// If the audio is not captured, then wait for 5 milli sec
+				}
 			}
 			sample_count = flag_pos*window_size;
 		}
@@ -94,7 +101,8 @@ void Keyword_Spotting()
 				one_count++;
 			}
 			else{
-				one_count=0;			
+				one_count=0;
+				T1 = high_resolution_clock::now();
 			}
 
 			if(one_count>4){	// If five such continous voice windows are detected then it is treated as a true voice
@@ -103,6 +111,7 @@ void Keyword_Spotting()
 					Voice_start = sample_count-(11*window_size);		// Voice starting point = present sample count - (5+6) windows // Five such 6 consecutive windows  
 				else
 					Voice_start = 0;
+				T2 = high_resolution_clock::now();
 				break;
 			}
 		}
@@ -124,13 +133,17 @@ void Keyword_Spotting()
 		
 		Voice_end = sample_count;
 		
+		if (fps) {
+			T1 = high_resolution_clock::now();
+		}
+		
 		if (Voice_end > Voice_start)
 			memcpy(InputChunk, InputData+Voice_start, 16000);		// After a voice detection, Copying the next 1 sec data directly to InputChunk
 		else{
 			memcpy(InputChunk, InputData+Voice_start, (ddr_buffer*window_size-Voice_start));		// If the voice is detected at the edge of audio memory buffer
 			memcpy(InputChunk+(ddr_buffer*window_size-Voice_start), InputData, 16000-(ddr_buffer*window_size-Voice_start));
 		}
-
+		
 		KWS_DS_CNN kws(InputChunk);
 
 		kws.extract_features(); //extract mfcc features
@@ -143,8 +156,12 @@ void Keyword_Spotting()
 		
 		switch (max_ind)
 		{
+		case 0:
+			silence_flag = true;
+			break;
 		case 1: //unknown keyword
 			printf("Unknown Keyword \n");
+			silence_flag = true;
 			break;
 		case 2:	//yes
 			bbox_disp = true;
@@ -220,6 +237,14 @@ void Keyword_Spotting()
 			printf("Keyword Detected : \"Off\" \t Task : Switch Off Monitor Display\n");
 			system(command);
 			break;
+		}
+		if (fps) {		
+			T2 = high_resolution_clock::now();
+			Time_taken = duration_cast<microseconds>(T2 - T1);
+			if(!silence_flag){
+				cout << "Time taken for Keyword Spotting and corresponding action = " << (double)((Time_taken.count())/1000) << " milli sec" << endl;
+				silence_flag = false;
+			}
 		}
 	}
 }

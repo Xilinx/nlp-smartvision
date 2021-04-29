@@ -28,6 +28,7 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include <vitis/ai/demo.hpp>
+#include <signal.h>
 #include"global_var.h"
 
 using namespace std;
@@ -68,22 +69,30 @@ static void usage(char *command){
 	"-l (or) --live-audio                         test the application with live audio input\n"
 	"-f (or) --file-audio  <testing_list>.txt     test the keyword spotting with audio files listed in the .txt file\n"
 	"-t (or) --test <sample_image> <model>        test the DPU with sample images. Input is Model and sample jpeg\n"
-	"-p (or) --print        use along with -l to print fps\n"
+	"-v (or) --verbose        use along with -l to print fps\n"
 	"\n"
 	  ), command);
 }
 
+void signal_callback_handler(int signum) {
+   cout << "Caught signal " << signum << endl;
+   // Terminate program
+   exit(signum);
+}
+
 int main(int argc, char *argv[])
 {	
+	// Register signal and signal handler
+   	signal(SIGINT, signal_callback_handler);
 	char *command = argv[0];
 	int option_index, c;
-	static const char short_options[] = "hlftp:";
+	static const char short_options[] = "hlftv:";
 	static const struct option long_options[] = {
 		{"help", 0, 0, 'h'},
 		{"live-audio", 0, 0, 'l'},
 		{"file-audio", 1, 0, 'f'},
 		{"test", 0, 0, 't'},
-		{"print", 0, 0, 'p'},
+		{"verbose", 0, 0, 'v'},
 		{0, 0, 0, 0}
 	};
 	
@@ -100,7 +109,7 @@ int main(int argc, char *argv[])
 		case 'l':
 			{
 			if(argc > 2 ) {
-				if ( (strcmp ("-p", argv[2]) == 0 ) || (strcmp ("--print", argv[2]) == 0) ){
+				if ( (strcmp ("-v", argv[2]) == 0 ) || (strcmp ("--verbose", argv[2]) == 0) ){
 					fps = true;
 				}
 				else {
