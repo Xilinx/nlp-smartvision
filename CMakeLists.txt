@@ -75,11 +75,7 @@ target_link_libraries(nlp_sv
 install(TARGETS nlp_sv DESTINATION ${INSTALL_PATH}/bin)
 
 install(PROGRAMS
-    script/rgb-mipi-dp.sh
-    DESTINATION ${INSTALL_PATH}/bin)
-
-install(PROGRAMS
-    script/nlp-smartvision
+    script/init_nlp_smartvision.sh
     DESTINATION ${INSTALL_PATH}/bin)
 
 install(FILES
