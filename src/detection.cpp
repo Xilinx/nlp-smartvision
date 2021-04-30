@@ -127,7 +127,7 @@ void Detection()
 		input.read(cur_frame);
 		if (cur_frame.empty())
 		{
-			std::cout << "!!! Failed to read frame. please run rgb-mipi-dp.sh to initialize videopipeline" << std::endl;
+			std::cout << "!!! Failed to read frame. please run init_nlp_smartvision.sh to initialize videopipeline" << std::endl;
 			return 0;
 			// don't let the execution continue, else application may crash.
 		}
@@ -177,7 +177,7 @@ void Detection()
 		t_2 = std::chrono::steady_clock::now();
 		d_milli = d_milli + std::chrono::duration_cast<std::chrono::milliseconds>( t_2 - t_1 ).count();
 		if (i >= 90){
-			std::cout << "...frame rate is: " << 10000/d_milli << std::endl;
+			std::cout << "...frame rate is: " << 90000/d_milli << std::endl;
 			i = 0;
 			d_milli = 0;
 		}
