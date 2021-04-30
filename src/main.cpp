@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
    	signal(SIGINT, signal_callback_handler);
 	char *command = argv[0];
 	int option_index, c;
-	static const char short_options[] = "hlftv:";
+	static const char short_options[] = "hlf:tv";
 	static const struct option long_options[] = {
 		{"help", 0, 0, 'h'},
 		{"live-audio", 0, 0, 'l'},

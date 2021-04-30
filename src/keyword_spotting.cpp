@@ -241,10 +241,10 @@ void Keyword_Spotting()
 		if (fps) {		
 			T2 = high_resolution_clock::now();
 			Time_taken = duration_cast<microseconds>(T2 - T1);
-			if(!silence_flag){
+			if(silence_flag == false){
 				cout << "Time taken for Keyword Spotting and corresponding action = " << (double)((Time_taken.count())/1000) << " milli sec" << endl;
-				silence_flag = false;
-			}
+			}		
+			else {silence_flag = false;}
 		}
 	}
 }
