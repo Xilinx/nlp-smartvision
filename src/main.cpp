@@ -68,7 +68,8 @@ static void usage(char *command){
 	"-h (or) --help                               help\n"
 	"-l (or) --live-audio                         test the application with live audio input\n"
 	"-f (or) --file-audio  <testing_list>.txt     test the keyword spotting with audio files listed in the .txt file\n"
-	"-t (or) --test <sample_image> <model>        test the DPU with sample images. Input is Model and sample jpeg\n"
+	"                                             Supported models are densebox_640_360, yolov2_voc_pruned_0_77 & plate_detect\n " 
+   "-t (or) --test <sample_image> <model>        test the DPU with sample images. Input is Model and sample jpeg\n"
 	"-v (or) --verbose        use along with -l to print fps\n"
 	"\n"
 	  ), command);

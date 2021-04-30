@@ -176,7 +176,7 @@ void Detection()
 		i = i + 1;
 		t_2 = std::chrono::steady_clock::now();
 		d_milli = d_milli + std::chrono::duration_cast<std::chrono::milliseconds>( t_2 - t_1 ).count();
-		if (i >= 10){
+		if (i >= 90){
 			std::cout << "...frame rate is: " << 10000/d_milli << std::endl;
 			i = 0;
 			d_milli = 0;
