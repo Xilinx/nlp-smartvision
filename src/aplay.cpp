@@ -180,7 +180,7 @@ static void signal_handler(int sig)
 	if (verbose==2)
 		putchar('\n');
 	if (!quiet_mode)
-		fprintf(stderr, _("Aborted by signal %s...\n"), strsignal(sig));
+		fprintf(stderr, _("\nAborted by signal %s...\n"), strsignal(sig));
 	if (handle)
 		snd_pcm_abort(handle);
 	if (sig == SIGABRT) {
@@ -571,11 +571,15 @@ static void xrun(void)
 			clock_gettime(CLOCK_MONOTONIC, &now);
 			snd_pcm_status_get_trigger_htstamp(status, &tstamp);
 			timermsub(&now, &tstamp, &diff);
-			fprintf(stderr, _("%s!!! (at least %.3f ms long)\n"),
+			fprintf(stderr, _("%s!!! (at least %.3f ms long) \n"),
 				stream == SND_PCM_STREAM_PLAYBACK ? _("underrun") : _("overrun"),
 				diff.tv_sec * 1000 + diff.tv_nsec / 1000000.0);
+			printf("Check the audio device connection and run the application again\n\n");
+			prg_exit(EXIT_FAILURE);
 #else
 			fprintf(stderr, "%s !!!\n", _("underrun"));
+			printf("Check the audio device connection and run the application again\n\n");
+			prg_exit(EXIT_FAILURE);
 #endif
 		} else {
 			struct timeval now, diff, tstamp;
@@ -585,6 +589,8 @@ static void xrun(void)
 			fprintf(stderr, _("%s!!! (at least %.3f ms long)\n"),
 				stream == SND_PCM_STREAM_PLAYBACK ? _("underrun") : _("overrun"),
 				diff.tv_sec * 1000 + diff.tv_usec / 1000.0);
+			printf("Check the audio device connection and run the application again\n");
+			prg_exit(EXIT_FAILURE);
 		}
 
 		if ((res = snd_pcm_prepare(handle))<0) {
@@ -715,6 +721,9 @@ static ssize_t pcm_read(u_char *data, size_t rcount)
 			xrun();
 		} else if (r == -ESTRPIPE) {
 			suspend();
+		} else if (r == -ENODEV) {
+			printf("\nNo input audio device is connected\n");
+			prg_exit(EXIT_FAILURE);
 		} else if (r < 0) {
 			printf("read error: %s", snd_strerror(r));
 			prg_exit(EXIT_FAILURE);
@@ -772,12 +781,13 @@ static void capture()
 	set_params();
 
 	init_stdin();
-
+	
 	do {
 		rest = count;
-
+	
 		/* capture */
 		while (rest > 0 && recycle_capture_file == 0 && !in_aborting) {
+			
 			size_t c = (rest <= (off64_t)chunk_bytes) ?
 				(size_t)rest : chunk_bytes;
 			size_t f = c * 8 / bits_per_frame;
@@ -798,7 +808,7 @@ static void capture()
 				audio_pos = 0;
 				flag_pos = 0;
 			}
-
+			
 		}
 
 		/* re-enable SIGUSR1 signal */
@@ -840,8 +850,9 @@ void Capture_Audio()
 	timelimit = 0;
 
 	err = snd_pcm_open(&handle, pcm_name, stream, open_mode);
+
 	if (err < 0) {
-		printf("audio open error: %s", snd_strerror(err));
+		printf("audio open error: %s\n\n", snd_strerror(err));
 		return 1;
 	}
 
@@ -849,7 +860,7 @@ void Capture_Audio()
 		printf("info error: %s", snd_strerror(err));
 		return 1;
 	}
-
+	
 	chunk_size = 2*window_size;
 	hwparams = rhwparams;
 
