@@ -128,7 +128,7 @@ void Detection()
 		if (cur_frame.empty())
 		{
 			std::cout << "!!! Failed to read frame. please run init_nlp_smartvision.sh to initialize videopipeline" << std::endl;
-			return 0;
+			exit(EXIT_FAILURE);
 			// don't let the execution continue, else application may crash.
 		}
 		switch (model)

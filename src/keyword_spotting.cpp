@@ -278,7 +278,7 @@ void Keyword_Spotting_Debug(char *testfile)
 			fp = fopen(FileName.c_str(), "rb");
 			if(fp == NULL){
 				printf("\nException opening/reading the audio file %s \n",FileName.c_str());
-				printf("Excepted way of storing the audio file names in %s file is keyword/audio_filename.wav \n\n",testfile);
+				printf("Expected way of storing the audio file names in %s file is keyword/audio_filename.wav \n\n",testfile);
 				return;
 			}
 			fread(&InputChunk[0],sizeof(short),16000,fp);  // Read the audio data
