@@ -86,7 +86,7 @@ install(FILES
 
 install(DIRECTORY
     notebook/
-    DESTINATION ${INSTALL_PATH}/share/notebooks/nlp_sv/)
+    DESTINATION ${INSTALL_PATH}/share/notebooks/nlp_smartvision/)
 
 set(VERSION "1.0.1")
 set(CPACK_PACKAGE_VERSION ${VERSION})

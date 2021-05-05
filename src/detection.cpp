@@ -22,10 +22,6 @@
 #include <vitis/ai/nnpp/yolov2.hpp>
 #include "./process_result_objectdetect.hpp"
 
-#include <vitis/ai/segmentation.hpp>
-#include <vitis/ai/nnpp/segmentation.hpp>
-#include "./process_result_segmentation.hpp"
-
 #include <vitis/ai/platedetect.hpp>
 #include <vitis/ai/nnpp/platedetect.hpp>
 #include "./process_result_platedetect.hpp"
