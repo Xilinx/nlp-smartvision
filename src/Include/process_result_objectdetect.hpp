@@ -148,12 +148,12 @@ static cv::Mat process_result_objectdetect(cv::Mat &image,
                   label2Color(label, blue, green, red), thickness, 1, 0);
 		cv::putText(image, sample_type(label), cv::Point(xmin, ymin), cv::FONT_HERSHEY_PLAIN, 1.0,  label2Color(label, blue, green, red), 2.0);
 	}
-	else if(bbox.x <= 0.5 and left==true){
+	else if( (bbox.x + (bbox.width/2)) <= 0.5 and left==true){
 		cv::rectangle(image, cv::Point(xmin, ymin), cv::Point(xmax, ymax),
                   label2Color(label, blue, green, red), thickness, 1, 0);
 		cv::putText(image, sample_type(label), cv::Point(xmin, ymin), cv::FONT_HERSHEY_PLAIN, 1.0,  label2Color(label, blue, green, red), 2.0);
 	}
-	 else if(bbox.x > 0.5 and right==true){
+	 else if((bbox.x + (bbox.width/2))  > 0.5 and right==true){
 		 cv::rectangle(image, cv::Point(xmin, ymin), cv::Point(xmax, ymax),
                   label2Color(label, blue, green, red), thickness, 1, 0);
 		cv::putText(image, sample_type(label), cv::Point(xmin, ymin), cv::FONT_HERSHEY_PLAIN, 1.0,  label2Color(label, blue, green, red), 2.0);

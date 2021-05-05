@@ -40,10 +40,10 @@ cv::Mat process_result_platedetect(cv::Mat &image, const vitis::ai::PlateDetectR
   if (left==false && right==false){
 	  	  	  cv::rectangle(image, rect, cv::Scalar(blue,green,red), thickness);
 	  }
-  else if(result.box.x <= 0.5 and left==true){
+  else if( (result.box.x + (result.box.width/2))  <= 0.5 and left==true){
 			  cv::rectangle(image, rect, cv::Scalar(blue,green,red), thickness);
 	  }
-  else if(result.box.x > 0.5 and right==true){
+  else if( (result.box.x + (result.box.width/2)) > 0.5 and right==true){
 			  cv::rectangle(image, rect, cv::Scalar(blue,green,red), thickness);
 	  }
   return image;

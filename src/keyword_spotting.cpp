@@ -129,7 +129,6 @@ void Keyword_Spotting()
 			}
 			else{
 				one_count=0;
-				T1 = high_resolution_clock::now();
 			}
 
 			if(one_count>4){	// If five such continous voice windows are detected then it is treated as a true voice
@@ -138,7 +137,6 @@ void Keyword_Spotting()
 					Voice_start = sample_count-(11*window_size);		// Voice starting point = present sample count - (5+6) windows // Five such 6 consecutive windows  
 				else
 					Voice_start = 0;
-				T2 = high_resolution_clock::now();
 				break;
 			}
 		}
