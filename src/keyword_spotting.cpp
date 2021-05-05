@@ -41,12 +41,39 @@ void Keyword_Spotting()
     int sample_count = 0;   
     int one_count = 0;
     int flag_pos = 0;
+    int total_energy = 0;	
 	short InputChunk[16000]; // Audio Input samples are in signed int16 precision
 	bool silence_flag = false;
 	
 	auto T1 = high_resolution_clock::now();
 	auto T2 = high_resolution_clock::now();
 	auto Time_taken = duration_cast<microseconds>(T2 - T1);
+
+	for(int j=0; j<100; j++){				// Calculation of noise threshold based on first 2 sec audio (~100 windows)
+		while(1){
+			if(Record_flag[flag_pos]==1){		// Checking whether this audio window is filled with samples or not
+				for(int i=0; i<window_size; i++){
+					total_energy +=  (float)pow(InputData[sample_count+i],2);}		// Accumulating energy of audio windows
+				Record_flag[flag_pos] = 0;			
+				flag_pos++;
+				if(flag_pos>=(ddr_buffer)){		// If all the windows are completed, then back to 0
+					flag_pos = 0;			
+				}
+				break;
+			}
+			else{
+			this_thread::sleep_for(chrono::milliseconds(5) );	// If the audio is not captured, then wait for 5 milli sec
+			}
+		}
+		sample_count = flag_pos*window_size;
+	}
+	
+	// 100 times of average noise enrergy is used to detect presence of voice in 6 consecutive windows
+	//Total energy of 6 consecutive audio sample windows, which is less than this is treated as silence
+	 silence_threshold = total_energy * 6.0;
+	
+	cout << "Noise Threshold is set. You can start speaking the keywords now.." << endl;
+
 
 	while(1){
 		
