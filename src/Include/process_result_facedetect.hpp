@@ -36,14 +36,14 @@ void process_result_facedetect(cv::Mat *m1, const vitis::ai::FaceDetectResult &r
 	  	                             (int)(r.height * m1->rows)}},
 	  	  						   cv::Scalar (blue,green,red), thickness);
 	  }
-	  else if(r.x <= 0.5 and left==true){
+	  else if((r.x + (r.width/2)) <= 0.5 and left==true){
 	  cv::rectangle((*m1),
                   cv::Rect{cv::Point(r.x * m1->cols, r.y * m1->rows),
                            cv::Size{(int)(r.width * m1->cols),
                            (int)(r.height * m1->rows)}},
 						   cv::Scalar (blue,green,red), thickness);
 	  }
-	  else if(r.x > 0.5 and right==true){
+	  else if((r.x + (r.width/2)) > 0.5 and right==true){
 	  	  cv::rectangle((*m1),
 	                    cv::Rect{cv::Point(r.x * m1->cols, r.y * m1->rows),
 	                             cv::Size{(int)(r.width * m1->cols),
