@@ -6,7 +6,7 @@ If you want to cross compile the source in Linux PC machine, follow these steps,
 
 2. Run "./build.sh ${SDKPATH}" in the source code folder of current application, to build the application. <a name="build-app"></a>
 
-3. The build process in [2](#build-app). will produce a rpm package smartcam-1.0.1-1.aarch64.rpm under build/, upload to the board, and run `rpm -ivh --force ./nlp_sv-1.0.1-1.aarch64.rpm` to update install.
+3. The build process in [2](#build-app). will produce a rpm package smartcam-1.0.1-1.aarch64.rpm under build/, upload to the board, and run `rpm -ivh --force ./nlp-smartvision-1.0.1-1.aarch64.rpm` to update install.
 
 # Setting up the Board
 
@@ -174,7 +174,7 @@ Before running any of the commandline applications, we need to initialize the bo
 * Set media nodes configurations by running the below command. It will intialize the MIPI capture and DP/HDMI display pipeline. It will exit automatically after 10 sec.
 
 ```bash
-init_nlp_smartvision.sh
+init-nlp-smartvision.sh
 ```
 
 ---
@@ -182,13 +182,13 @@ init_nlp_smartvision.sh
 Run the following command to launch the application for live audio input via USB microphone. The user needs to pronounce any of the ten keywords (Yes, No, Off, On, Up, Down, Left, Right, Stop, Go) after running the following command.
 
 ```bash
-sudo LD_LIBRARY_PATH=/opt/xilinx/lib nlp_sv -l
+sudo LD_LIBRARY_PATH=/opt/xilinx/lib nlp-smartvision -l
 ```
 
 <p align="center"> (or) </p>
 
 ```bash
-sudo LD_LIBRARY_PATH=/opt/xilinx/lib nlp_sv --live-audio
+sudo LD_LIBRARY_PATH=/opt/xilinx/lib nlp-smartvision --live-audio
 ```
 
 The detected keyword will be displayed on the terminal and the corresponding action on the input video stream will be displayed on the monitor, which is connected to the board through DP/HDMI cable.
@@ -196,7 +196,7 @@ The detected keyword will be displayed on the terminal and the corresponding act
 To print FPS along with the above application use -v or --verbose flag shown in the below command. The FPS is measured as average over 90 consecutive frames. Also the latency of keywords spotting + action is printed while the keyword is detected.
 
 ```bash
-sudo LD_LIBRARY_PATH=/opt/xilinx/lib nlp_sv -l -v
+sudo LD_LIBRARY_PATH=/opt/xilinx/lib nlp-smartvision -l -v
 ```
 
 > You should be able to see the video the camera is capturing on the monitor connected to the board
@@ -212,13 +212,13 @@ NLP SmartVision provides a mode which is dedicated for testing the accuracy of k
 The following command tests the audio files listed in the testing_list.txt file. Please refer to [Testing Accuracy on Google Command Dataset](#testing-accuracy-on-google-command-dataset) to find out how testing_list.txt is created
 
 ```bash
-sudo LD_LIBRARY_PATH=/opt/xilinx/lib nlp_sv -f testing_list.txt
+sudo LD_LIBRARY_PATH=/opt/xilinx/lib nlp-smartvision -f testing_list.txt
 ```
 
 <p align="center"> (or) </p>
 
 ```bash
-sudo LD_LIBRARY_PATH=/opt/xilinx/lib nlp_sv --file-audio testing_list.txt
+sudo LD_LIBRARY_PATH=/opt/xilinx/lib nlp-smartvision --file-audio testing_list.txt
 ```
 
 ## Testing Accuracy on Google Command Dataset
@@ -274,7 +274,7 @@ NLP SmartVision provides a mode which is dedicated for testing the Vision models
 The following command tests the image files.
 
 ```bash
-sudo LD_LIBRARY_PATH=/opt/xilinx/lib nlp_sv -t <image.jpg/image.png> <model>
+sudo LD_LIBRARY_PATH=/opt/xilinx/lib nlp-smartvision -t <image.jpg/image.png> <model>
 ```
 
 The command returns the metadata along with a jpg fine containing bounding box on the input image
@@ -287,13 +287,13 @@ The application is installed as:
 
   | filename | description |
   |----------|-------------|
-  | nlp-sv  | Main application for demo |
+  | nlp-smartvision | Main application |
 
 * Script File: => /opt/xilinx/bin/
 
   | filename | description |
   |----------|-------------|
-  | rgb-mipi-dp.sh | Configures media nodes to run RGB - MIPI DP/HDMI Pipeline |
+  | init-nlp-smartvision.sh | Configures media nodes to run RGB - MIPI DP/HDMI Pipeline |
 
 * Jupyter notebook file: => /opt/xilinx/share/notebooks/nlp-smartvision
 
