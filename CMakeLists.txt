@@ -16,7 +16,7 @@
 
 cmake_minimum_required(VERSION 3.5)
 
-project(nlp_sv)
+project(nlp-smartvision)
 
 SET(CMAKE_INSTALL_PREFIX $ENV{OECORE_TARGET_SYSROOT})
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__USE_XOPEN2K8 -DENABLE_PRECOMPILED_HEADERS=OFF -g -Wall -O2 -fpermissive -fmessage-length=0 -rdynamic -Wl,--no-undefined -Wno-narrowing" )
@@ -54,44 +54,44 @@ install(TARGETS hello_edge DESTINATION ${INSTALL_PATH}/lib)
 
 
 # build the executable 
-add_executable(nlp_sv src/main.cpp src/detection.cpp src/keyword_spotting.cpp src/aplay.cpp)
-target_include_directories(nlp_sv PRIVATE ${OpenCV_INCLUDE_DIRS})
-target_include_directories(nlp_sv PRIVATE ${GSTREAMER_INCLUDE_DIRS})
-target_include_directories(nlp_sv PRIVATE ${CMAKE_SOURCE_DIR}/acapture/src)
-target_include_directories(nlp_sv PRIVATE ${CMAKE_SOURCE_DIR}/src/Include)
-target_include_directories(nlp_sv PRIVATE ${CMAKE_SOURCE_DIR}/Hello_edge/src)
-target_include_directories(nlp_sv PRIVATE ${CMAKE_SOURCE_DIR}/CMSIS/Core/Include)
-target_include_directories(nlp_sv PRIVATE ${CMAKE_SOURCE_DIR}/CMSIS/DSP/Include)
-target_include_directories(nlp_sv PRIVATE ${CMAKE_SOURCE_DIR}/CMSIS/NN/Include)
-target_include_directories(nlp_sv PRIVATE ${CMAKE_SOURCE_DIR}/CMSIS/DSP/PrivateInclude)
-target_link_directories(nlp_sv PRIVATE ${INSTALL_PATH}/lib)
+add_executable(nlp-smartvision src/main.cpp src/detection.cpp src/keyword_spotting.cpp src/aplay.cpp)
+target_include_directories(nlp-smartvision PRIVATE ${OpenCV_INCLUDE_DIRS})
+target_include_directories(nlp-smartvision PRIVATE ${GSTREAMER_INCLUDE_DIRS})
+target_include_directories(nlp-smartvision PRIVATE ${CMAKE_SOURCE_DIR}/acapture/src)
+target_include_directories(nlp-smartvision PRIVATE ${CMAKE_SOURCE_DIR}/src/Include)
+target_include_directories(nlp-smartvision PRIVATE ${CMAKE_SOURCE_DIR}/Hello_edge/src)
+target_include_directories(nlp-smartvision PRIVATE ${CMAKE_SOURCE_DIR}/CMSIS/Core/Include)
+target_include_directories(nlp-smartvision PRIVATE ${CMAKE_SOURCE_DIR}/CMSIS/DSP/Include)
+target_include_directories(nlp-smartvision PRIVATE ${CMAKE_SOURCE_DIR}/CMSIS/NN/Include)
+target_include_directories(nlp-smartvision PRIVATE ${CMAKE_SOURCE_DIR}/CMSIS/DSP/PrivateInclude)
+target_link_directories(nlp-smartvision PRIVATE ${INSTALL_PATH}/lib)
 
 include_directories(${CMAKE_SOURCE_DIR}/script)
 
 
-target_link_libraries(nlp_sv
+target_link_libraries(nlp-smartvision
   xilinxopencl pthread rt dl crypt stdc++ asound CMSIS hello_edge opencv_core opencv_video opencv_videoio opencv_imgproc opencv_imgcodecs opencv_highgui vitis_ai_library-yolov2 vitis_ai_library-facedetect vitis_ai_library-platedetect vitis_ai_library-lanedetect vitis_ai_library-segmentation glog gstapp-1.0 gstreamer-1.0 gstbase-1.0 gobject-2.0 glib-2.0 gstvideo-1.0 gstallocators-1.0 
   glib-2.0 gobject-2.0)
-install(TARGETS nlp_sv DESTINATION ${INSTALL_PATH}/bin)
+install(TARGETS nlp-smartvision DESTINATION ${INSTALL_PATH}/bin)
 
 install(PROGRAMS
-    script/init_nlp_smartvision.sh
+    script/init-nlp-smartvision.sh
     DESTINATION ${INSTALL_PATH}/bin)
 
 install(FILES
     README.md
     DESTINATION ${INSTALL_PATH}/
-    RENAME  README_KWS
+    RENAME  README_NLP_SMARTVISION
     )
 
 install(DIRECTORY
     notebook/
-    DESTINATION ${INSTALL_PATH}/share/notebooks/nlp_smartvision/)
+    DESTINATION ${INSTALL_PATH}/share/notebooks/nlp-smartvision/)
 
 set(VERSION "1.0.1")
 set(CPACK_PACKAGE_VERSION ${VERSION})
 set(CPACK_GENERATOR "RPM")
-set(CPACK_PACKAGE_NAME "nlp_sv")
+set(CPACK_PACKAGE_NAME "nlp-smartvision")
 set(CPACK_PACKAGE_RELEASE 1)
 set(CPACK_PACKAGE_CONTACT "mshaik@xilinx.com")
 set(CPACK_PACKAGE_VENDOR "xilinx")
