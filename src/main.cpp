@@ -75,6 +75,19 @@ static void usage(char *command){
 	  ), command);
 }
 
+static std::string exec(const char* cmd) {
+    std::array<char, 128> buffer;
+    std::string result;
+    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
+    if (!pipe) {
+	throw std::runtime_error("popen() failed!");
+    }
+    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+	result += buffer.data();
+    }
+    return result;
+}
+
 void signal_callback_handler(int signum) {
    cout << "Caught signal " << signum << endl;
    // Terminate program
@@ -96,7 +109,7 @@ int main(int argc, char *argv[])
 		{"verbose", 0, 0, 'v'},
 		{0, 0, 0, 0}
 	};
-	
+		
 	if (argc == 1 || argc > 4) {
 		usage(command);  	// print the usage of application
 		return 1;
@@ -109,6 +122,18 @@ int main(int argc, char *argv[])
 			return 1;
 		case 'l':
 			{
+			// Check availability of audio device with CAPTURE stream
+			std::ostringstream cmd;
+			cmd << "arecord -l" << " | grep card";
+			std::string a = exec(cmd.str().c_str());
+			size_t found = a.find("card");
+			if (found == string::npos){
+                		printf("No Audio Capture device found. \nPlease check your input audio device \nExiting Application... \n");
+	                	free(InputData);
+		                free(Record_flag);
+        		        return 1;
+		        }
+
 			if(argc > 2 ) {
 				if ( (strcmp ("-v", argv[2]) == 0 ) || (strcmp ("--verbose", argv[2]) == 0) ){
 					fps = true;
@@ -143,6 +168,8 @@ int main(int argc, char *argv[])
 			return 1;
 		}
 	}
+	free(InputData);
+        free(Record_flag);
 	
 	return 1;
 }
