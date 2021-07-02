@@ -76,6 +76,7 @@ install(TARGETS nlp-smartvision DESTINATION ${INSTALL_PATH}/bin)
 
 install(PROGRAMS
     script/init-nlp-smartvision.sh
+    script/nlp-smartvision-install.py
     DESTINATION ${INSTALL_PATH}/bin)
 
 install(FILES
