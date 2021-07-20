@@ -104,10 +104,12 @@ void Detection()
 	char pip[2500];
     	pip[0] = '\0';
 	sprintf(pip + strlen(pip), "v4l2src device=%s ! video/x-raw, width=1024, height=768 ! appsink ", mipidev.c_str());
-	// std::cout << pip << std::endl;
-	cv::VideoCapture input(pip , cv::CAP_GSTREAMER);
-	cv::VideoWriter output("appsrc ! kmssink driver-name=xlnx plane-id=39 fullscreen-overlay=true sync=false -v", cv::VideoWriter::fourcc('R', 'X', '2', '4'), 30.0, cv::Size(HSIZE,VSIZE), true);
-
+//	std::cout << pip << std::endl;
+//	std:: cout << "passed 0" << std::endl;
+	cv::VideoCapture input(pip, cv::CAP_GSTREAMER);
+//	std:: cout << "passed 1" << std::endl;
+	cv::VideoWriter output("appsrc ! perf ! kmssink driver-name=xlnx fullscreen-overlay=true plane-id=39 sync=false", cv::VideoWriter::fourcc('R', 'X', '2', '4'), 30.0, cv::Size(HSIZE,VSIZE), true);
+//	std:: cout << "passed 2" << std::endl;
 	auto ml_task = vitis::ai::FaceDetect::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/densebox_640_360/densebox_640_360.xmodel");
 	auto ml_task_1 = vitis::ai::YOLOv2::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/yolov2_voc_pruned_0_77/yolov2_voc_pruned_0_77.xmodel");
 	auto ml_task_2 = vitis::ai::PlateDetect::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/plate_detect/plate_detect.xmodel");
