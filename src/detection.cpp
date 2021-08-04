@@ -48,7 +48,7 @@
 
 #include"global_var.h"
 static std::string mipidev("");
-static char *msgFirmware = (char *)"Please make sure that the HW accelerator firmware is loaded via xmutil loadapp kv260-smartcam.\n";
+static char *msgFirmware = (char *)"Please make sure that the HW accelerator firmware is loaded via xmutil loadapp kv260-nlp-smartvision.\n";
 	
 //Initialisation of capture, drm, ml and thread related
 #define HSIZE 1024
@@ -125,7 +125,7 @@ void Detection()
 		input.read(cur_frame);
 		if (cur_frame.empty())
 		{
-			std::cout << "!!! Failed to read frame. please run init_nlp_smartvision.sh to initialize videopipeline" << std::endl;
+			std::cout << "!!! Failed to read frame. please run init-nlp-smartvision.sh to initialize videopipeline" << std::endl;
 			exit(EXIT_FAILURE);
 			// don't let the execution continue, else application may crash.
 		}
