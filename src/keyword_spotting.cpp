@@ -253,12 +253,14 @@ void Keyword_Spotting()
 			}
 			break; 
 		case 8:	   //on 
-			snprintf(command, sizeof(command), "modetest -M xlnx -D fd4a0000.zynqmp-display -w 40:alpha:0");
+			//snprintf(command, sizeof(command), "modetest -M xlnx -D fd4a0000.zynqmp-display -w 40:alpha:0");
+			display_on = true;			
 			printf("Keyword Detected : \"On\" \t Task : Switch On Monitor Display\n");
 			system(command);
 			break;
 		case 9: //off 
-			snprintf(command, sizeof(command), "modetest -M xlnx -D fd4a0000.zynqmp-display -w 40:alpha:255");
+			//snprintf(command, sizeof(command), "modetest -M xlnx -D fd4a0000.zynqmp-display -w 40:alpha:255");
+			display_on = false;			
 			printf("Keyword Detected : \"Off\" \t Task : Switch Off Monitor Display\n");
 			system(command);
 			break;

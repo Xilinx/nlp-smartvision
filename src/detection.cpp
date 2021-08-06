@@ -113,6 +113,7 @@ void Detection()
 	auto ml_task = vitis::ai::FaceDetect::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/densebox_640_360/densebox_640_360.xmodel");
 	auto ml_task_1 = vitis::ai::YOLOv2::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/yolov2_voc_pruned_0_77/yolov2_voc_pruned_0_77.xmodel");
 	auto ml_task_2 = vitis::ai::PlateDetect::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/plate_detect/plate_detect.xmodel");
+	cv::Mat image_off(768, 1024, CV_8UC3, cv::Scalar(0, 0, 0));
 	auto t_1 = std::chrono::steady_clock::now();
 	auto t_2 = std::chrono::steady_clock::now();
 	int i = 0;
@@ -169,7 +170,12 @@ void Detection()
 		}
 		
 		//The getMat function lags the active/queued buffer by 4 frames
-		output.write(cur_frame);
+		if(display_on){
+			output.write(cur_frame);
+		}
+		else {
+			output.write(image_off);
+		}
 		if (fps) {
 		i = i + 1;
 		t_2 = std::chrono::steady_clock::now();

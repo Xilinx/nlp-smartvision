@@ -54,6 +54,7 @@ int blue = 0;
 bool top = false;			//Default state to process output for complete screen; top=False
 bool bottom = false;		//Default state to process output for complete screen; bottom=False
 bool fps = false;
+bool display_on = true;
 
 void Keyword_Spotting();	//Function to do kewyword spotting
 void Keyword_Spotting_Debug(char *testfile); //Function to test kewyword spotting

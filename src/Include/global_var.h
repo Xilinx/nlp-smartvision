@@ -35,5 +35,6 @@ extern bool top;
 extern bool bottom;
 extern int x[10];
 extern bool fps;
+extern bool display_on;
 
 #endif
