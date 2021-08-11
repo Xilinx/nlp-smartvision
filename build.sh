@@ -5,7 +5,7 @@ sdkdir=${1}
 conf=${2:-Release}
 
 unset LD_LIBRARY_PATH;
-source ${sdkdir}/environment-setup-aarch64-xilinx-linux;
+source ${sdkdir}/environment-setup-cortexa72-cortexa53-xilinx-linux;
 
 mkdir -p build
 cd build
