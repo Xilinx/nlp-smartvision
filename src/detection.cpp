@@ -28,7 +28,7 @@
 
 #include <glog/logging.h>
 #include <iostream>
-#include<semaphore.h>
+#include <semaphore.h>
 #include <memory>
 #include <thread>
 #include <opencv2/core.hpp>
@@ -46,96 +46,214 @@
 #include <unistd.h>
 #include <sys/types.h>
 
-#include"global_var.h"
-static std::string mipidev("");
+#include "global_var.h"
+
 static char *msgFirmware = (char *)"Please make sure that the HW accelerator firmware is loaded via xmutil loadapp kv260-nlp-smartvision.\n";
-	
-//Initialisation of capture, drm, ml and thread related
-#define HSIZE 1024
-#define VSIZE 768
-static std::string exec(const char* cmd) {
-	    std::array<char, 128> buffer;
-	    std::string result;
-	    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
-	    if (!pipe) {
+
+static std::string mipidev("");
+static char usbdev;
+static std::string mipimediadev("");
+
+static std::string exec(const char *cmd)
+{
+	std::array<char, 128> buffer;
+	std::string result;
+	std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
+	if (!pipe)
+	{
 		throw std::runtime_error("popen() failed!");
-	    }
-	    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+	}
+	while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
+	{
 		result += buffer.data();
-	    }
-	    return result;
+	}
+	return result;
+}
+
+static std::string findmipidevice()
+{
+	glob_t globbuf;
+	std::string dev("");
+	glob("/dev/video*", 0, NULL, &globbuf);
+	for (int i = 0; (unsigned)i < globbuf.gl_pathc; i++)
+	{
+		std::ostringstream cmd;
+		cmd << "v4l2-ctl -d " << globbuf.gl_pathv[i] << " --all | grep Driver | grep name | grep xilinx-video | wc -l";
+		std::string a = exec(cmd.str().c_str());
+		a = a.substr(0, a.find("\n"));
+		if (a == std::string("1"))
+		{
+			dev = globbuf.gl_pathv[i];
+			break;
+		}
 	}
 
-cv::Mat cur_frame;
+	globfree(&globbuf);
+	std::string FindMIPIDev = dev;
+	std::cout << "found mipi video node at: " << FindMIPIDev << std::endl;
+	std::string mipi_dev = FindMIPIDev;
+	if (mipi_dev == "")
+	{
+		g_printerr("ERROR: MIPI device is not ready.\n%s", msgFirmware);
+		exit(EXIT_FAILURE);
+	}
+	if (access(mipi_dev.c_str(), F_OK) != 0)
+	{
+		g_printerr("ERROR: Device %s is not ready.\n%s", mipi_dev.c_str(), msgFirmware);
+		exit(EXIT_FAILURE);
+	}
+	std::cout << "mipi device is ready" << std::endl;
+	return mipi_dev;
+}
+
+static std::string findmipimedianode()
+{
+	glob_t globbuf;
+	std::string dev("");
+	glob("/dev/media*", 0, NULL, &globbuf);
+	for (int i = 0; (unsigned)i < globbuf.gl_pathc; i++)
+	{
+		std::ostringstream cmd1;
+		cmd1 << "media-ctl -d " << globbuf.gl_pathv[i] << " -p | grep xilinx-video | wc -l";
+		std::string a = exec(cmd1.str().c_str());
+		a = a.substr(0, a.find("\n"));
+		if (a == std::string("1"))
+		{
+			dev = globbuf.gl_pathv[i];
+			break;
+		}
+	}
+
+	globfree(&globbuf);
+	std::string FindMIPIDev = dev;
+	return FindMIPIDev;
+}
+
+static char findusbdevice()
+{
+	glob_t globbuf;
+	std::string dev("");
+	glob("/dev/video*", 0, NULL, &globbuf);
+	for (int i = 0; (unsigned)i < globbuf.gl_pathc; i++)
+	{
+		std::ostringstream cmd;
+		cmd << "v4l2-ctl -d " << globbuf.gl_pathv[i] << " --all | grep Driver | grep name | grep uvcvideo | wc -l";
+		std::string a = exec(cmd.str().c_str());
+		a = a.substr(0, a.find("\n"));
+		if (a == std::string("2"))
+		{
+			dev = globbuf.gl_pathv[i];
+			break;
+		}
+	}
+
+	globfree(&globbuf);
+	std::string FindMIPIDev = dev;
+	std::cout << "found USB video node at: " << FindMIPIDev << std::endl;
+	char mipi_dev = FindMIPIDev[10];
+
+	std::cout << "USB device is ready at:" << mipi_dev << std::endl;
+	return mipi_dev;
+}
 
 void Detection()
 {
-    	glob_t globbuf;
-	std::cout << "finding mipi video node: " ;
-    	std::string dev("");
-  	glob("/dev/video*", 0, NULL, &globbuf);
-    	for (int i = 0; i < globbuf.gl_pathc; i++)
-    	{
-        	std::ostringstream cmd;
-        	cmd << "v4l2-ctl -d " << globbuf.gl_pathv[i] << " --all | grep Driver | grep name | grep xilinx-video | wc -l";
-       		std::string a = exec(cmd.str().c_str());
-		a=a.substr(0, a.find("\n"));
-		if ( a == std::string("1") )
-		{
-		    dev = globbuf.gl_pathv[i];
-		    break;
-		}
+	cv::VideoCapture input;
+	cv::VideoWriter output;
+	cv::Mat image_off;
+	int HSIZE, VSIZE;
+	if (usb){
+		HSIZE = 800;
+		VSIZE = 600;
 	}
-	globfree(&globbuf);
-	std::string FindMIPIDev = dev;
-	std::cout << FindMIPIDev << std::endl;
+	else{
+		HSIZE = 1024;
+		VSIZE = 768;
+	}
 
-	mipidev = FindMIPIDev;
-	if (mipidev == "")
-	    {
-		g_printerr("ERROR: MIPI device is not ready.\n%s", msgFirmware);
-		return 1;
-	    }
-	    if ( access( mipidev.c_str(), F_OK ) != 0 )
-	    {
-		g_printerr("ERROR: Device %s is not ready.\n%s", mipidev.c_str(), msgFirmware);
-		return 1;
+	if (usb)
+	{
+		usbdev = findusbdevice();
+		input.open((int)usbdev - 48);
+		input.set(cv::CAP_PROP_FRAME_WIDTH, 800);
+		input.set(cv::CAP_PROP_FRAME_HEIGHT, 600);
+		if (!input.isOpened())
+		{
+			std::cerr << "ERROR: Could not open camera" << std::endl;
+			return;
+		}
+		//double fps1 = input.get(cv::CAP_PROP_FPS);
+                //std::cout << "FPS on USB Cam is:" << fps1 << std::endl;
+
+		image_off = cv::Mat (600, 800, CV_8UC3, cv::Scalar(0, 0, 0));
 	}
-	char pip[2500];
-    	pip[0] = '\0';
-	sprintf(pip + strlen(pip), "v4l2src device=%s ! video/x-raw, width=1024, height=768 ! appsink ", mipidev.c_str());
-//	std::cout << pip << std::endl;
-//	std:: cout << "passed 0" << std::endl;
-	cv::VideoCapture input(pip, cv::CAP_GSTREAMER);
-//	std:: cout << "passed 1" << std::endl;
-	cv::VideoWriter output("appsrc ! perf ! kmssink driver-name=xlnx fullscreen-overlay=true plane-id=39 sync=false", cv::VideoWriter::fourcc('R', 'X', '2', '4'), 30.0, cv::Size(HSIZE,VSIZE), true);
-//	std:: cout << "passed 2" << std::endl;
+	else
+	{
+		mipidev = findmipidevice();
+		mipimediadev = findmipimedianode();
+		std::cout << "Configuring mipi for RGB/1024x768 pipeline" << std::endl;
+        std::string tmp = "/snap/xlnx-nlp-smartvision/current/bin/init-nlp-smartvision.sh '" + mipimediadev + "'";
+        int systemRet = system(tmp.c_str());
+	if(systemRet == -1){
+  	// The system method failed
+		std::cout << "failed to initialize mipi with RGB/1024x768 resolution, check if nlp-smartvision firmware is loaded";
+		return;
+	}
+
+		char pip[2500];
+		pip[0] = '\0';
+		sprintf(pip + strlen(pip), "v4l2src device=%s ! video/x-raw, width=1024, height=768 ! appsink ", mipidev.c_str());
+
+		input.open(pip, cv::CAP_GSTREAMER);
+		image_off = cv::Mat (768, 1024, CV_8UC3, cv::Scalar(0, 0, 0));
+	}
+
+	std::ostringstream desktop_cmd;
+	const char* env_p = std::getenv("XDG_SESSION_TYPE");
+	std::string a = "tty";
+	// std::cout << "XDG_SESSION_TYPE is:" << env_p << std::endl;
+	int compare = std::strcmp(env_p , a.c_str());
+	// std::cout << "string compare is:" << compare << std::endl;
+	if (compare == 0)
+	{
+		std::cout << "Running remotly or Desktop environment not detected, Application will use kmssink to display video over monitor" << std::endl;
+		output.open("appsrc ! kmssink bus-id=fd4a0000.zynqmp-display fullscreen-overlay=true sync=false", cv::VideoWriter::fourcc('R', 'X', '2', '4'), 30.0, cv::Size(HSIZE, VSIZE), true);
+	}
+	else
+	{
+		std::cout << "Desktop environment detected, Application will lauch a window to display the video" << std::endl;
+	 	output.open("appsrc ! videoconvert ! video/x-raw, format=RGB16 ! ximagesink sync=false", cv::VideoWriter::fourcc('R', 'X', '1', '5'), 30.0, cv::Size(HSIZE, VSIZE), true);
+	}
+
 	auto ml_task = vitis::ai::FaceDetect::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/densebox_640_360/densebox_640_360.xmodel");
 	auto ml_task_1 = vitis::ai::YOLOv2::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/yolov2_voc_pruned_0_77/yolov2_voc_pruned_0_77.xmodel");
 	auto ml_task_2 = vitis::ai::PlateDetect::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/plate_detect/plate_detect.xmodel");
-	cv::Mat image_off(768, 1024, CV_8UC3, cv::Scalar(0, 0, 0));
+
+	cv::Mat cur_frame;
 	auto t_1 = std::chrono::steady_clock::now();
 	auto t_2 = std::chrono::steady_clock::now();
 	int i = 0;
-	auto d_milli = std::chrono::duration_cast<std::chrono::milliseconds>( t_1 - t_1 ).count();
+	auto d_milli = std::chrono::duration_cast<std::chrono::milliseconds>(t_1 - t_1).count();
 	while (true)
 	{
-		if (fps) {
-		t_1 = std::chrono::steady_clock::now();
+		if (fps)
+		{
+			t_1 = std::chrono::steady_clock::now();
 		}
 		input.read(cur_frame);
 		if (cur_frame.empty())
 		{
-			std::cout << "!!! Failed to read frame. please run init-nlp-smartvision.sh to initialize videopipeline" << std::endl;
+			std::cout << "!!! Failed to read frame from mipi media node. Please make sure the design is loaded" << std::endl;
 			exit(EXIT_FAILURE);
-			// don't let the execution continue, else application may crash.
 		}
 		switch (model)
 		{
 		case 0:
-		{	if (print_model == true ) {
-			print_model = false;
-			std:: cout << "Facedetect Kernel Loaded" << std::endl;
+		{
+			if (print_model == true)
+			{
+				print_model = false;
+				std::cout << "Facedetect Kernel Loaded" << std::endl;
 			}
 
 			auto res = ml_task->run(cur_frame);
@@ -146,9 +264,12 @@ void Detection()
 			break;
 		}
 		case 1:
-		{ if (print_model ==true ) {
-			print_model = false;
-			std:: cout << "Objectdetect Kernel Loaded" << std::endl;}
+		{
+			if (print_model == true)
+			{
+				print_model = false;
+				std::cout << "Objectdetect Kernel Loaded" << std::endl;
+			}
 			auto res1 = ml_task_1->run(cur_frame);
 			if (bbox_disp == true)
 			{
@@ -157,9 +278,12 @@ void Detection()
 			break;
 		}
 		case 2:
-		{ if (print_model ==true ) {
-		print_model = false;
-		std:: cout << "Platedetect Kernel Loaded" << std::endl;}
+		{
+			if (print_model == true)
+			{
+				print_model = false;
+				std::cout << "Platedetect Kernel Loaded" << std::endl;
+			}
 			auto res2 = ml_task_2->run(cur_frame);
 			if (bbox_disp == true)
 			{
@@ -168,28 +292,29 @@ void Detection()
 			break;
 		}
 		}
-		
-		//The getMat function lags the active/queued buffer by 4 frames
-		if(display_on){
+
+		if (display_on)
 			output.write(cur_frame);
-		}
-		else {
+		else
 			output.write(image_off);
-		}
-		if (fps) {
-		i = i + 1;
-		t_2 = std::chrono::steady_clock::now();
-		d_milli = d_milli + std::chrono::duration_cast<std::chrono::milliseconds>( t_2 - t_1 ).count();
-		if (i >= 90){
-			std::cout << "...frame rate is: " << 90000/d_milli << std::endl;
-			i = 0;
-			d_milli = 0;
-		}
+
+		if (fps)
+		{
+			i = i + 1;
+			t_2 = std::chrono::steady_clock::now();
+			d_milli = d_milli + std::chrono::duration_cast<std::chrono::milliseconds>(t_2 - t_1).count();
+			if (i >= 90)
+			{
+				std::cout << "...frame rate is: " << 90000 / d_milli << std::endl;
+				i = 0;
+				d_milli = 0;
+			}
 		}
 	}
 }
 
-void test_models(char *file, char* aitask){
+void test_models(char *file, char *aitask)
+{
 	cv::Mat I = cv::imread(file);
 	if (I.empty())
 	{
@@ -197,26 +322,30 @@ void test_models(char *file, char* aitask){
 		return;
 		// don't let the execution continue, else imshow() will crash.
 	}
-	
-	if(!strcmp(aitask, "densebox_640_360")) {
+
+	if (!strcmp(aitask, "densebox_640_360"))
+	{
 		// printf(("densebox.\n\n"));
 		auto ml_task = vitis::ai::FaceDetect::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/densebox_640_360/densebox_640_360.xmodel");
 		auto res = ml_task->run(I);
 		process_result_facedetect(&I, res, true, 0, bbox_thick, dleft, dright, green, blue, red);
 	}
-	else if (!strcmp(aitask, "yolov2_voc_pruned_0_77")) {
+	else if (!strcmp(aitask, "yolov2_voc_pruned_0_77"))
+	{
 		// printf(("yolov2_voc_pruned_0_77.\n\n"));
 		auto ml_task = vitis::ai::YOLOv2::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/yolov2_voc_pruned_0_77/yolov2_voc_pruned_0_77.xmodel");
 		auto res = ml_task->run(I);
 		process_result_objectdetect(I, res, true, 0, bbox_thick, dleft, dright, green, blue, red);
 	}
-	else if (!strcmp(aitask, "plate_detect")) {
+	else if (!strcmp(aitask, "plate_detect"))
+	{
 		// printf(("plate_detect.\n\n"));
 		auto ml_task = vitis::ai::PlateDetect::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/plate_detect/plate_detect.xmodel");
 		auto res = ml_task->run(I);
 		process_result_platedetect(I, res, true, 0, bbox_thick, dleft, dright, green, blue, red);
 	}
-	else {
+	else
+	{
 		printf(("Supported models are densebox_640_360, yolov2_voc_pruned_0_77 & plate_detect .\n\n"));
 		return;
 	}

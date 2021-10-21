@@ -18,7 +18,7 @@
 #define __GlobalVar_H__
 
 extern int window_size;
-extern int ddr_buffer;	
+extern int ddr_buffer;
 extern short *InputData;
 extern bool *Record_flag;
 extern bool bbox_disp;
@@ -36,5 +36,7 @@ extern bool bottom;
 extern int x[10];
 extern bool fps;
 extern bool display_on;
+extern bool usb;
+extern int usb_video_node;
 
 #endif

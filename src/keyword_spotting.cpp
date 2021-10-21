@@ -30,7 +30,7 @@ using namespace std::chrono;
 
 void Keyword_Spotting()
 {
-	char command[256];
+	//char command[256];
 	//char output_class[12][8] = {"Silence", "Unknown", "yes", "no", "up", "down", "left", "right", "on", "off", "stop", "go"};
     float window_energy=0;
 	float window[6];
@@ -256,13 +256,13 @@ void Keyword_Spotting()
 			//snprintf(command, sizeof(command), "modetest -M xlnx -D fd4a0000.zynqmp-display -w 40:alpha:0");
 			display_on = true;			
 			printf("Keyword Detected : \"On\" \t Task : Switch On Monitor Display\n");
-			system(command);
+			//system(command);
 			break;
 		case 9: //off 
 			//snprintf(command, sizeof(command), "modetest -M xlnx -D fd4a0000.zynqmp-display -w 40:alpha:255");
 			display_on = false;			
 			printf("Keyword Detected : \"Off\" \t Task : Switch Off Monitor Display\n");
-			system(command);
+			//system(command);
 			break;
 		}
 		if (fps) {		
@@ -278,7 +278,7 @@ void Keyword_Spotting()
 
 void Keyword_Spotting_Debug(char *testfile)
 {
-	char command[256];
+	//char command[256];
 	//char output_class[12][8] = {"Silence", "Unknown", "yes", "no", "up", "down", "left", "right", "on", "off", "stop", "go"};
 	string Actual_Keyword;
 	string Detected_Keyword;
@@ -308,7 +308,11 @@ void Keyword_Spotting_Debug(char *testfile)
 				printf("Expected way of storing the audio file names in %s file is keyword/audio_filename.wav \n\n",testfile);
 				return;
 			}
-			fread(&InputChunk[0],sizeof(short),16000,fp);  // Read the audio data
+			size_t result = fread(&InputChunk[0],sizeof(short),16000,fp);  // Read the audio data
+			if (result == 0) {
+				printf("\nException reading the audio file %s \n",FileName.c_str());
+				return;
+			}
 			fclose(fp);
 			
 			file_count++;
@@ -331,7 +335,7 @@ void Keyword_Spotting_Debug(char *testfile)
 			kws.classify();			//classify using dnn
 			
 			int max_ind = kws.get_top_class(kws.output);
-			int temp;
+			//int temp;
 			//		char output_class[12][8] = {"Silence", "Unknown","yes","no","up","down","left","right","on","off","stop","go"};
 			
 			switch (max_ind)

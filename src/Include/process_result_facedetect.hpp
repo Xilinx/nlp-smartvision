@@ -14,44 +14,43 @@
  * limitations under the License.
  */
 
+#include <glog/logging.h>
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include <string>
-#include <glog/logging.h>
 
-void process_result_facedetect(cv::Mat *m1, const vitis::ai::FaceDetectResult &result,
-                       bool is_jpeg, long int time, int thickness, bool left, bool right, int green, int blue, int red) {
+
+void process_result_facedetect(cv::Mat *m1,
+                               const vitis::ai::FaceDetectResult &result,
+                               bool is_jpeg, long int time, int thickness,
+                               bool left, bool right, int green, int blue,
+                               int red) {
   for (const auto &r : result.rects) {
     LOG_IF(INFO, is_jpeg) << " " << r.score << " " //
-                           << r.x << " "            //
-                           << r.y << " "            //
-                           << r.width << " "        //
-                           << r.height;
+                          << r.x << " "            //
+                          << r.y << " "            //
+                          << r.width << " "        //
+                          << r.height;
 
-
-	  if (left==false && right==false){
-	  	  	  cv::rectangle((*m1),
-	  	                    cv::Rect{cv::Point(r.x * m1->cols, r.y * m1->rows),
-	  	                             cv::Size{(int)(r.width * m1->cols),
-	  	                             (int)(r.height * m1->rows)}},
-	  	  						   cv::Scalar (blue,green,red), thickness);
-	  }
-	  else if((r.x + (r.width/2)) <= 0.5 and left==true){
-	  cv::rectangle((*m1),
-                  cv::Rect{cv::Point(r.x * m1->cols, r.y * m1->rows),
-                           cv::Size{(int)(r.width * m1->cols),
-                           (int)(r.height * m1->rows)}},
-						   cv::Scalar (blue,green,red), thickness);
-	  }
-	  else if((r.x + (r.width/2)) > 0.5 and right==true){
-	  	  cv::rectangle((*m1),
-	                    cv::Rect{cv::Point(r.x * m1->cols, r.y * m1->rows),
-	                             cv::Size{(int)(r.width * m1->cols),
-	                             (int)(r.height * m1->rows)}},
-	  						   cv::Scalar (blue,green,red), thickness);
-	  }
-
-
+    if (left == false && right == false) {
+      cv::rectangle((*m1),
+                    cv::Rect{cv::Point(r.x * m1->cols, r.y * m1->rows),
+                             cv::Size{(int)(r.width * m1->cols),
+                                      (int)(r.height * m1->rows)}},
+                    cv::Scalar(blue, green, red), thickness);
+    } else if ((r.x + (r.width / 2)) <= 0.5 and left == true) {
+      cv::rectangle((*m1),
+                    cv::Rect{cv::Point(r.x * m1->cols, r.y * m1->rows),
+                             cv::Size{(int)(r.width * m1->cols),
+                                      (int)(r.height * m1->rows)}},
+                    cv::Scalar(blue, green, red), thickness);
+    } else if ((r.x + (r.width / 2)) > 0.5 and right == true) {
+      cv::rectangle((*m1),
+                    cv::Rect{cv::Point(r.x * m1->cols, r.y * m1->rows),
+                             cv::Size{(int)(r.width * m1->cols),
+                                      (int)(r.height * m1->rows)}},
+                    cv::Scalar(blue, green, red), thickness);
+    }
   }
   return;
 }
