@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <thread>
 #include <vitis/ai/demo.hpp>
+#include <string>
 
 using namespace std;
 using namespace std::chrono;
@@ -72,6 +73,7 @@ void Keyword_Spotting_Debug(
 void test_models(char *file, char *aitask);
 void Detection();     // function to perform the Vision Task
 void Capture_Audio(); // Function to capture audio continuously
+std::string mipi_type = "imx_vcap_csi";
 
 static void usage(char *command)
 {
@@ -79,7 +81,7 @@ static void usage(char *command)
           "Usage: %s [OPTION] [arg1] [arg2]\n"
           "\n"
           "-h (or) --help                               help\n"
-          "-m (or) --mipi				test the application with live video from mipi camera\n"
+          "-m (or) --mipi <isp/imx>			test the application with live video from mipi cameras IMX(default)/ISP\n"
           "-u (or) --usb				test the application with live video from USB camera\n"
           "-f (or) --file-audio  <testing_list>.txt	test the keyword spotting with audio files listed in the .txt file\n"
           "-t (or) --test <sample_image> <model>	test the DPU with sample images. Input is Model and sample jpeg\n"
@@ -153,23 +155,56 @@ int main(int argc, char *argv[])
         return 1;
       }
 
-      if (argc > 2)
+      if (argc == 3)
       {
-        if ((strcmp("-v", argv[2]) == 0) ||
-            (strcmp("--verbose", argv[2]) == 0))
-        {
-          fps = true;
-        }
-        else
-        {
-          printf(("Try `%s --help' for more information.\n\n"), command);
-          usage(command);
-          return 1;
-        }
+		if (strcmp("isp", argv[2])==0){
+			mipi_type = "isp_vcap_csi";
+		}
+		else if(strcmp("imx", argv[2])==0){
+			mipi_type = "imx_vcap_csi";
+		}
+		else if ( (strcmp ("-v", argv[2]) == 0 ) || (strcmp ("--verbose", argv[2]) == 0) ){
+					fps = true;
+		}
+		else {
+			printf(("Try `%s --help' for more information.\n\n"), command); 
+			usage(command);
+			return 1;
+		}
       }
+      if (argc == 4)
+      {
+		if (strcmp("isp", argv[2])==0){
+			mipi_type = "isp_vcap_csi";
+		}
+		else if(strcmp("imx", argv[2])==0){
+			mipi_type = "imx_vcap_csi";
+		}
+		else {
+			printf(("Try `%s --help' for more information.\n\n"), command); 
+			usage(command);
+			return 1;
+		}
+
+		if ( (strcmp ("-v", argv[3]) == 0 ) || (strcmp ("--verbose", argv[3]) == 0) ){
+					fps = true;
+		}
+		else {
+			printf(("Try `%s --help' for more information.\n\n"), command); 
+			usage(command);
+			return 1;
+		}
+      }
+      if (argc > 4)
+      {
+			printf(("Try `%s --help' for more information.\n\n"), command); 
+			usage(command);
+			return 1;
+      }
+
       thread CA(Capture_Audio);     // Start Capturing audio in live
       thread KWS(Keyword_Spotting); // Start Detecting the keyword
-      thread FD(Detection);         // Start Processing of Vision Task
+      thread FD(Detection);         //  Start Processing of Vision Task
       CA.join();
       KWS.join();
       FD.join();

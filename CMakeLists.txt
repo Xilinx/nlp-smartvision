@@ -75,7 +75,8 @@ target_link_libraries(nlp-smartvision
 install(TARGETS nlp-smartvision DESTINATION ${INSTALL_PATH}/bin)
 
 install(PROGRAMS
-    script/init-nlp-smartvision.sh
+    script/init-isp-smartvision.sh
+    script/init-imx-smartvision.sh
     script/nlp-smartvision-install.py
     DESTINATION ${INSTALL_PATH}/bin)
 

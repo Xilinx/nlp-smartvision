@@ -20,6 +20,8 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 
+#include <string>
+
 extern int window_size;
 extern int ddr_buffer;
 extern short *InputData;
@@ -44,4 +46,5 @@ extern int usb_video_node;
 extern	cv::VideoCapture input;
 extern	cv::VideoWriter output;
 
+extern std::string mipi_type;
 #endif

@@ -70,7 +70,7 @@ static std::string exec(const char *cmd)
 	return result;
 }
 
-static std::string findmipidevice()
+static std::string findmipidevice(std::string s)
 {
 	glob_t globbuf;
 	std::string dev("");
@@ -78,10 +78,10 @@ static std::string findmipidevice()
 	for (int i = 0; (unsigned)i < globbuf.gl_pathc; i++)
 	{
 		std::ostringstream cmd;
-		cmd << "v4l2-ctl -d " << globbuf.gl_pathv[i] << " --all | grep Driver | grep name | grep xilinx-video | wc -l";
+		cmd << "v4l2-ctl -d " << globbuf.gl_pathv[i] << " --all | grep " << s.c_str() << " | wc -l";
 		std::string a = exec(cmd.str().c_str());
 		a = a.substr(0, a.find("\n"));
-		if (a == std::string("1"))
+		if (a == std::string("3"))
 		{
 			dev = globbuf.gl_pathv[i];
 			break;
@@ -106,7 +106,7 @@ static std::string findmipidevice()
 	return mipi_dev;
 }
 
-static std::string findmipimedianode()
+static std::string findmipimedianode(std::string s)
 {
 	glob_t globbuf;
 	std::string dev("");
@@ -114,10 +114,10 @@ static std::string findmipimedianode()
 	for (int i = 0; (unsigned)i < globbuf.gl_pathc; i++)
 	{
 		std::ostringstream cmd1;
-		cmd1 << "media-ctl -d " << globbuf.gl_pathv[i] << " -p | grep xilinx-video | wc -l";
+		cmd1 << "media-ctl -d " << globbuf.gl_pathv[i] << " -p | grep " << s.c_str() << " | wc -l";
 		std::string a = exec(cmd1.str().c_str());
 		a = a.substr(0, a.find("\n"));
-		if (a == std::string("1"))
+		if (a == std::string("2"))
 		{
 			dev = globbuf.gl_pathv[i];
 			break;
@@ -187,10 +187,19 @@ void Detection()
 	}
 	else
 	{
-		mipidev = findmipidevice();
-		mipimediadev = findmipimedianode();
-		std::cout << "Configuring mipi for RGB/1024x768 pipeline" << std::endl;
-        std::string tmp = "/snap/xlnx-nlp-smartvision/current/bin/init-nlp-smartvision.sh '" + mipimediadev + "'";
+		mipidev = findmipidevice(mipi_type);
+		mipimediadev = findmipimedianode(mipi_type);
+		std::string tmp;
+	std::cout << "Configuring ";
+	if(strcmp("isp_vcap_csi", mipi_type.c_str())==0){
+		std::cout << "isp ";
+        	tmp = "init-isp-smartvision.sh '" + mipimediadev + "'";
+	}
+	else {
+		std::cout << "imx ";
+		tmp = "init-imx-smartvision.sh " + mipimediadev + " " + mipidev +" ";
+	}
+	std::cout << "node for RGB/1024x768 pipeline \n" << tmp << std::endl;
         int systemRet = system(tmp.c_str());
 	if(systemRet == -1){
   	// The system method failed
@@ -212,16 +221,9 @@ void Detection()
 	// std::cout << "XDG_SESSION_TYPE is:" << env_p << std::endl;
 	int compare = std::strcmp(env_p , a.c_str());
 	// std::cout << "string compare is:" << compare << std::endl;
-	if (compare == 0)
-	{
+
 		std::cout << "Running remotly or Desktop environment not detected, Application will use kmssink to display video over monitor" << std::endl;
-		output.open("appsrc ! kmssink bus-id=fd4a0000.zynqmp-display fullscreen-overlay=true sync=false", cv::VideoWriter::fourcc('R', 'X', '2', '4'), 30.0, cv::Size(HSIZE, VSIZE), true);
-	}
-	else
-	{
-		std::cout << "Desktop environment detected, Application will lauch a window to display the video" << std::endl;
-	 	output.open("appsrc ! videoconvert ! video/x-raw, format=RGB16 ! ximagesink sync=false", cv::VideoWriter::fourcc('R', 'X', '1', '5'), 30.0, cv::Size(HSIZE, VSIZE), true);
-	}
+		output.open("appsrc ! kmssink driver-name=xlnx plane-id=39 fullscreen-overlay=true sync=false", cv::VideoWriter::fourcc('R', 'X', '2', '4'), 30.0, cv::Size(HSIZE, VSIZE), true);
 
 	auto ml_task = vitis::ai::FaceDetect::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/densebox_640_360/densebox_640_360.xmodel");
 	auto ml_task_1 = vitis::ai::YOLOv2::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/yolov2_voc_pruned_0_77/yolov2_voc_pruned_0_77.xmodel");
