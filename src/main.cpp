@@ -64,8 +64,13 @@ bool bottom =
 bool fps = false;
 bool display_on = true;
 bool usb = false;
+
 cv::VideoCapture input;
 cv::VideoWriter output;
+
+bool rtsp = false;
+std::string rtsp_url;
+
 
 void Keyword_Spotting(); // Function to do kewyword spotting
 void Keyword_Spotting_Debug(
@@ -81,8 +86,9 @@ static void usage(char *command)
           "Usage: %s [OPTION] [arg1] [arg2]\n"
           "\n"
           "-h (or) --help                               help\n"
-          "-m (or) --mipi <isp/imx>			test the application with live video from mipi cameras IMX(default)/ISP\n"
+          "-m (or) --mipi <isp/rpi>			test the application with live video from mipi cameras RPI(default)/ISP\n"
           "-u (or) --usb				test the application with live video from USB camera\n"
+          "-r (or) --rtsp <rtsp://xxx.xxx.x.xx/test>"  "test the application with live video from rtsp\n"
           "-f (or) --file-audio  <testing_list>.txt	test the keyword spotting with audio files listed in the .txt file\n"
           "-t (or) --test <sample_image> <model>	test the DPU with sample images. Input is Model and sample jpeg\n"
           "                                             Supported models are densebox_640_360, yolov2_voc_pruned_0_77 & plate_detect\n"
@@ -120,9 +126,9 @@ int main(int argc, char *argv[])
   signal(SIGINT, signal_callback_handler);
   char *command = argv[0];
   int option_index, c;
-  static const char short_options[] = "hmuf:tv";
+  static const char short_options[] = "hmurf:tv";
   static const struct option long_options[] = {
-      {"help", 0, 0, 'h'}, {"mipi", 0, 0, 'l'}, {"usb", 1, 0, 'u'}, {"file-audio", 1, 0, 'f'}, {"test", 0, 0, 't'}, {"verbose", 0, 0, 'v'}, {0, 0, 0, 0}};
+      {"help", 0, 0, 'h'}, {"mipi", 0, 0, 'l'}, {"usb", 1, 0, 'u'}, {"rtsp", 1, 0, 'r'}, {"file-audio", 1, 0, 'f'}, {"test", 0, 0, 't'}, {"verbose", 0, 0, 'v'}, {0, 0, 0, 0}};
 
   if (argc == 1 || argc > 4)
   {
@@ -157,49 +163,58 @@ int main(int argc, char *argv[])
 
       if (argc == 3)
       {
-		if (strcmp("isp", argv[2])==0){
-			mipi_type = "isp_vcap_csi";
-		}
-		else if(strcmp("imx", argv[2])==0){
-			mipi_type = "imx_vcap_csi";
-		}
-		else if ( (strcmp ("-v", argv[2]) == 0 ) || (strcmp ("--verbose", argv[2]) == 0) ){
-					fps = true;
-		}
-		else {
-			printf(("Try `%s --help' for more information.\n\n"), command); 
-			usage(command);
-			return 1;
-		}
+        if (strcmp("isp", argv[2]) == 0)
+        {
+          mipi_type = "isp_vcap_csi";
+        }
+        else if (strcmp("rpi", argv[2]) == 0)
+        {
+          mipi_type = "imx_vcap_csi";
+        }
+        else if ((strcmp("-v", argv[2]) == 0) || (strcmp("--verbose", argv[2]) == 0))
+        {
+          fps = true;
+        }
+        else
+        {
+          printf(("Try `%s --help' for more information.\n\n"), command);
+          usage(command);
+          return 1;
+        }
       }
       if (argc == 4)
       {
-		if (strcmp("isp", argv[2])==0){
-			mipi_type = "isp_vcap_csi";
-		}
-		else if(strcmp("imx", argv[2])==0){
-			mipi_type = "imx_vcap_csi";
-		}
-		else {
-			printf(("Try `%s --help' for more information.\n\n"), command); 
-			usage(command);
-			return 1;
-		}
+        if (strcmp("isp", argv[2]) == 0)
+        {
+          mipi_type = "isp_vcap_csi";
+        }
+        else if (strcmp("imx", argv[2]) == 0)
+        {
+          mipi_type = "imx_vcap_csi";
+        }
+        else
+        {
+          printf(("Try `%s --help' for more information.\n\n"), command);
+          usage(command);
+          return 1;
+        }
 
-		if ( (strcmp ("-v", argv[3]) == 0 ) || (strcmp ("--verbose", argv[3]) == 0) ){
-					fps = true;
-		}
-		else {
-			printf(("Try `%s --help' for more information.\n\n"), command); 
-			usage(command);
-			return 1;
-		}
+        if ((strcmp("-v", argv[3]) == 0) || (strcmp("--verbose", argv[3]) == 0))
+        {
+          fps = true;
+        }
+        else
+        {
+          printf(("Try `%s --help' for more information.\n\n"), command);
+          usage(command);
+          return 1;
+        }
       }
       if (argc > 4)
       {
-			printf(("Try `%s --help' for more information.\n\n"), command); 
-			usage(command);
-			return 1;
+        printf(("Try `%s --help' for more information.\n\n"), command);
+        usage(command);
+        return 1;
       }
 
       thread CA(Capture_Audio);     // Start Capturing audio in live
@@ -231,6 +246,41 @@ int main(int argc, char *argv[])
         }
       }
       usb = true;
+      thread CA(Capture_Audio);     // Start Capturing audio in live
+      thread KWS(Keyword_Spotting); // Start Detecting the keyword
+      thread FD(Detection);         // Start Processing of Vision Task
+      CA.join();
+      KWS.join();
+      FD.join();
+      break;
+    }
+    case 'r':{
+      if (argc < 3)
+      {
+          printf(("Try `%s --help' for more information.\n\n"), command);
+          usage(command);
+          return 1;
+      }
+      if (argc == 3)
+      {
+        rtsp_url = argv[2];
+      }
+      if (argc > 3)
+      {
+        rtsp_url = argv[2];
+        if ((strcmp("-v", argv[3]) == 0) ||
+            (strcmp("--verbose", argv[3]) == 0))
+        {
+          fps = true;
+        }
+        else
+        {
+          printf(("Try `%s --help' for more information.\n\n"), command);
+          usage(command);
+          return 1;
+        }
+      }
+      rtsp = true;
       thread CA(Capture_Audio);     // Start Capturing audio in live
       thread KWS(Keyword_Spotting); // Start Detecting the keyword
       thread FD(Detection);         // Start Processing of Vision Task

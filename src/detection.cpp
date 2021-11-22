@@ -160,11 +160,13 @@ void Detection()
 {
 	cv::Mat image_off;
 	int HSIZE, VSIZE;
-	if (usb){
+	if (usb)
+	{
 		HSIZE = 800;
 		VSIZE = 600;
 	}
-	else{
+	else
+	{
 		HSIZE = 1024;
 		VSIZE = 768;
 	}
@@ -181,49 +183,63 @@ void Detection()
 			return;
 		}
 		//double fps1 = input.get(cv::CAP_PROP_FPS);
-                //std::cout << "FPS on USB Cam is:" << fps1 << std::endl;
+		//std::cout << "FPS on USB Cam is:" << fps1 << std::endl;
 
-		image_off = cv::Mat (600, 800, CV_8UC3, cv::Scalar(0, 0, 0));
+		image_off = cv::Mat(600, 800, CV_8UC3, cv::Scalar(0, 0, 0));
+	}
+	else if (rtsp)
+	{
+		char pip1[2500];
+		pip1[0] = '\0';
+		sprintf(pip1 + strlen(pip1), "rtspsrc location=%s latency=100 ! queue ! rtph265depay ! h265parse ! video/x-h265, profile=main, alignment=au ! omxh265dec internal-entropy-buffers=5 low-latency=0 ! queue max-size-bytes=0 ! v4l2convert capture-io-mode=4 output-io-mode=4 ! video/x-raw, width=1024, height=768, format=BGR ! appsink", rtsp_url.c_str());
+		std::cout << pip1 << std::endl;
+		input.open(pip1, cv::CAP_GSTREAMER);
+		image_off = cv::Mat(768, 1024, CV_8UC3, cv::Scalar(0, 0, 0));
+
 	}
 	else
 	{
 		mipidev = findmipidevice(mipi_type);
 		mipimediadev = findmipimedianode(mipi_type);
 		std::string tmp;
-	std::cout << "Configuring ";
-	if(strcmp("isp_vcap_csi", mipi_type.c_str())==0){
-		std::cout << "isp ";
-        	tmp = "init-isp-smartvision.sh '" + mipimediadev + "'";
-	}
-	else {
-		std::cout << "imx ";
-		tmp = "init-imx-smartvision.sh " + mipimediadev + " " + mipidev +" ";
-	}
-	std::cout << "node for RGB/1024x768 pipeline \n" << tmp << std::endl;
-        int systemRet = system(tmp.c_str());
-	if(systemRet == -1){
-  	// The system method failed
-		std::cout << "failed to initialize mipi with RGB/1024x768 resolution, check if nlp-smartvision firmware is loaded";
-		return;
-	}
+		std::cout << "Configuring ";
+		if (strcmp("isp_vcap_csi", mipi_type.c_str()) == 0)
+		{
+			std::cout << "isp ";
+			tmp = "init-isp-smartvision.sh '" + mipimediadev + "'";
+		}
+		else
+		{
+			std::cout << "imx ";
+			tmp = "init-imx-smartvision.sh " + mipimediadev + " " + mipidev + " ";
+		}
+		std::cout << "node for RGB/1024x768 pipeline \n"
+				  << tmp << std::endl;
+		int systemRet = system(tmp.c_str());
+		if (systemRet == -1)
+		{
+			// The system method failed
+			std::cout << "failed to initialize mipi with RGB/1024x768 resolution, check if nlp-smartvision firmware is loaded";
+			return;
+		}
 
 		char pip[2500];
 		pip[0] = '\0';
 		sprintf(pip + strlen(pip), "v4l2src device=%s ! video/x-raw, width=1024, height=768 ! appsink ", mipidev.c_str());
 
 		input.open(pip, cv::CAP_GSTREAMER);
-		image_off = cv::Mat (768, 1024, CV_8UC3, cv::Scalar(0, 0, 0));
+		image_off = cv::Mat(768, 1024, CV_8UC3, cv::Scalar(0, 0, 0));
 	}
 
 	std::ostringstream desktop_cmd;
-	const char* env_p = std::getenv("XDG_SESSION_TYPE");
+	const char *env_p = std::getenv("XDG_SESSION_TYPE");
 	std::string a = "tty";
 	// std::cout << "XDG_SESSION_TYPE is:" << env_p << std::endl;
-	int compare = std::strcmp(env_p , a.c_str());
+	int compare = std::strcmp(env_p, a.c_str());
 	// std::cout << "string compare is:" << compare << std::endl;
 
-		std::cout << "Running remotly or Desktop environment not detected, Application will use kmssink to display video over monitor" << std::endl;
-		output.open("appsrc ! kmssink driver-name=xlnx plane-id=39 fullscreen-overlay=true sync=false", cv::VideoWriter::fourcc('R', 'X', '2', '4'), 30.0, cv::Size(HSIZE, VSIZE), true);
+	// std::cout << "Running remotly or Desktop environment not detected, Application will use kmssink to display video over monitor" << std::endl;
+	// output.open("appsrc ! kmssink driver-name=xlnx plane-id=39 fullscreen-overlay=true sync=false", cv::VideoWriter::fourcc('R', 'X', '2', '4'), 30.0, cv::Size(HSIZE, VSIZE), true);
 
 	auto ml_task = vitis::ai::FaceDetect::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/densebox_640_360/densebox_640_360.xmodel");
 	auto ml_task_1 = vitis::ai::YOLOv2::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/yolov2_voc_pruned_0_77/yolov2_voc_pruned_0_77.xmodel");
@@ -234,6 +250,7 @@ void Detection()
 	auto t_2 = std::chrono::steady_clock::now();
 	int i = 0;
 	auto d_milli = std::chrono::duration_cast<std::chrono::milliseconds>(t_1 - t_1).count();
+	int check_off = 1;
 	while (true)
 	{
 		if (fps)
@@ -294,10 +311,22 @@ void Detection()
 		}
 
 		if (display_on)
+		{	
+			if(check_off == 1)
+			{
+				output.open("appsrc ! kmssink driver-name=xlnx plane-id=39 fullscreen-overlay=true sync=false", cv::VideoWriter::fourcc('R', 'X', '2', '4'), 30.0, cv::Size(HSIZE, VSIZE), true);
+				check_off = 0;
+			}
 			output.write(cur_frame);
+		}
 		else
-			output.write(image_off);
-
+		{	
+			if(check_off == 0)
+			{
+				output.release();
+				check_off = 1;
+			}
+		}
 		if (fps)
 		{
 			i = i + 1;
