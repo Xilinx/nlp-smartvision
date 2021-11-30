@@ -16,6 +16,9 @@
 
 #ifndef __GlobalVar_H__
 #define __GlobalVar_H__
+#include <opencv2/core.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
 
 extern int window_size;
 extern int ddr_buffer;
@@ -38,5 +41,7 @@ extern bool fps;
 extern bool display_on;
 extern bool usb;
 extern int usb_video_node;
+extern	cv::VideoCapture input;
+extern	cv::VideoWriter output;
 
 #endif

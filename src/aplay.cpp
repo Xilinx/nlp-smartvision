@@ -173,6 +173,8 @@ static void prg_exit(int code)
 
 static void signal_handler(int sig)
 {
+	input.release();
+	output.release();
 	if (in_aborting)
 		return;
 

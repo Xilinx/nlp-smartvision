@@ -63,6 +63,8 @@ bool bottom =
 bool fps = false;
 bool display_on = true;
 bool usb = false;
+cv::VideoCapture input;
+cv::VideoWriter output;
 
 void Keyword_Spotting(); // Function to do kewyword spotting
 void Keyword_Spotting_Debug(

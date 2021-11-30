@@ -158,8 +158,6 @@ static char findusbdevice()
 
 void Detection()
 {
-	cv::VideoCapture input;
-	cv::VideoWriter output;
 	cv::Mat image_off;
 	int HSIZE, VSIZE;
 	if (usb){
