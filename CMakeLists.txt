@@ -54,25 +54,29 @@ install(TARGETS hello_edge DESTINATION ${INSTALL_PATH}/lib)
 
 
 # build the executable 
-add_executable(nlp-smartvision src/main.cpp src/detection.cpp src/keyword_spotting.cpp src/aplay.cpp)
-target_include_directories(nlp-smartvision PRIVATE ${OpenCV_INCLUDE_DIRS})
-target_include_directories(nlp-smartvision PRIVATE ${GSTREAMER_INCLUDE_DIRS})
-target_include_directories(nlp-smartvision PRIVATE ${CMAKE_SOURCE_DIR}/acapture/src)
-target_include_directories(nlp-smartvision PRIVATE ${CMAKE_SOURCE_DIR}/src/Include)
-target_include_directories(nlp-smartvision PRIVATE ${CMAKE_SOURCE_DIR}/Hello_edge/src)
-target_include_directories(nlp-smartvision PRIVATE ${CMAKE_SOURCE_DIR}/CMSIS/Core/Include)
-target_include_directories(nlp-smartvision PRIVATE ${CMAKE_SOURCE_DIR}/CMSIS/DSP/Include)
-target_include_directories(nlp-smartvision PRIVATE ${CMAKE_SOURCE_DIR}/CMSIS/NN/Include)
-target_include_directories(nlp-smartvision PRIVATE ${CMAKE_SOURCE_DIR}/CMSIS/DSP/PrivateInclude)
-target_link_directories(nlp-smartvision PRIVATE ${INSTALL_PATH}/lib)
+add_executable(nlp-smartvision.app src/main.cpp src/detection.cpp src/keyword_spotting.cpp src/aplay.cpp)
+target_include_directories(nlp-smartvision.app PRIVATE ${OpenCV_INCLUDE_DIRS})
+target_include_directories(nlp-smartvision.app PRIVATE ${GSTREAMER_INCLUDE_DIRS})
+target_include_directories(nlp-smartvision.app PRIVATE ${CMAKE_SOURCE_DIR}/acapture/src)
+target_include_directories(nlp-smartvision.app PRIVATE ${CMAKE_SOURCE_DIR}/src/Include)
+target_include_directories(nlp-smartvision.app PRIVATE ${CMAKE_SOURCE_DIR}/Hello_edge/src)
+target_include_directories(nlp-smartvision.app PRIVATE ${CMAKE_SOURCE_DIR}/CMSIS/Core/Include)
+target_include_directories(nlp-smartvision.app PRIVATE ${CMAKE_SOURCE_DIR}/CMSIS/DSP/Include)
+target_include_directories(nlp-smartvision.app PRIVATE ${CMAKE_SOURCE_DIR}/CMSIS/NN/Include)
+target_include_directories(nlp-smartvision.app PRIVATE ${CMAKE_SOURCE_DIR}/CMSIS/DSP/PrivateInclude)
+target_link_directories(nlp-smartvision.app PRIVATE ${INSTALL_PATH}/lib)
 
 include_directories(${CMAKE_SOURCE_DIR}/script)
 
 
-target_link_libraries(nlp-smartvision
+target_link_libraries(nlp-smartvision.app
   xilinxopencl pthread rt dl crypt stdc++ asound CMSIS hello_edge opencv_core opencv_video opencv_videoio opencv_imgproc opencv_imgcodecs opencv_highgui vitis_ai_library-yolov2 vitis_ai_library-facedetect vitis_ai_library-platedetect vitis_ai_library-lanedetect vitis_ai_library-segmentation glog gstapp-1.0 gstreamer-1.0 gstbase-1.0 gobject-2.0 glib-2.0 gstvideo-1.0 gstallocators-1.0 
   glib-2.0 gobject-2.0)
-install(TARGETS nlp-smartvision DESTINATION ${INSTALL_PATH}/bin)
+install(TARGETS nlp-smartvision.app
+	DESTINATION ${INSTALL_PATH}/bin)
+
+install(PROGRAMS script/nlp-smartvision 
+	DESTINATION ${INSTALL_PATH}/bin)
 
 install(PROGRAMS
     script/init-isp-smartvision.sh

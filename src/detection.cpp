@@ -48,7 +48,7 @@
 
 #include "global_var.h"
 
-static char *msgFirmware = (char *)"Please make sure that the HW accelerator firmware is loaded via xmutil loadapp kv260-nlp-smartvision.\n";
+static char *msgFirmware = (char *)"Please make sure that the kv260-nlp-smartvision accelerator firmware is loaded via xmutil.\n";
 
 static std::string mipidev("");
 static char usbdev;
@@ -102,7 +102,7 @@ static std::string findmipidevice(std::string s)
 		g_printerr("ERROR: Device %s is not ready.\n%s", mipi_dev.c_str(), msgFirmware);
 		exit(EXIT_FAILURE);
 	}
-	std::cout << "mipi device is ready" << std::endl;
+	// std::cout << "mipi device is ready" << std::endl;
 	return mipi_dev;
 }
 
@@ -152,7 +152,7 @@ static char findusbdevice()
 	std::cout << "found USB video node at: " << FindMIPIDev << std::endl;
 	char mipi_dev = FindMIPIDev[10];
 
-	std::cout << "USB device is ready at:" << mipi_dev << std::endl;
+	// std::cout << "USB device is ready at:" << mipi_dev << std::endl;
 	return mipi_dev;
 }
 
@@ -187,16 +187,6 @@ void Detection()
 
 		image_off = cv::Mat(600, 800, CV_8UC3, cv::Scalar(0, 0, 0));
 	}
-	else if (rtsp)
-	{
-		char pip1[2500];
-		pip1[0] = '\0';
-		sprintf(pip1 + strlen(pip1), "rtspsrc location=%s latency=100 ! queue ! rtph265depay ! h265parse ! video/x-h265, profile=main, alignment=au ! omxh265dec internal-entropy-buffers=5 low-latency=0 ! queue max-size-bytes=0 ! v4l2convert capture-io-mode=4 output-io-mode=4 ! video/x-raw, width=1024, height=768, format=BGR ! appsink", rtsp_url.c_str());
-		std::cout << pip1 << std::endl;
-		input.open(pip1, cv::CAP_GSTREAMER);
-		image_off = cv::Mat(768, 1024, CV_8UC3, cv::Scalar(0, 0, 0));
-
-	}
 	else
 	{
 		mipidev = findmipidevice(mipi_type);
@@ -211,10 +201,10 @@ void Detection()
 		else
 		{
 			std::cout << "imx ";
-			tmp = "init-imx-smartvision.sh " + mipimediadev + " " + mipidev + " ";
+			tmp = "init-imx-smartvision.sh '" + mipimediadev + "'";
 		}
-		std::cout << "node for RGB/1024x768 pipeline \n"
-				  << tmp << std::endl;
+		std::cout << "node for RGB/1024x768 pipeline \n" ;
+				//  << tmp << std::endl;
 		int systemRet = system(tmp.c_str());
 		if (systemRet == -1)
 		{

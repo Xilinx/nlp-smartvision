@@ -47,6 +47,4 @@ extern	cv::VideoCapture input;
 extern	cv::VideoWriter output;
 
 extern std::string mipi_type;
-extern std::string rtsp_url;
-extern bool rtsp;
 #endif
