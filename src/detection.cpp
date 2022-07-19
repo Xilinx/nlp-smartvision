@@ -221,16 +221,13 @@ void Detection()
 		image_off = cv::Mat(768, 1024, CV_8UC3, cv::Scalar(0, 0, 0));
 	}
 
-	std::ostringstream desktop_cmd;
-	const char *env_p = std::getenv("XDG_SESSION_TYPE");
+		std::ostringstream desktop_cmd;
+	const char* env_p = std::getenv("XDG_SESSION_TYPE");
 	std::string a = "tty";
-	// std::cout << "XDG_SESSION_TYPE is:" << env_p << std::endl;
-	int compare = std::strcmp(env_p, a.c_str());
-	// std::cout << "string compare is:" << compare << std::endl;
-
-	// std::cout << "Running remotly or Desktop environment not detected, Application will use kmssink to display video over monitor" << std::endl;
-	// output.open("appsrc ! kmssink driver-name=xlnx plane-id=39 fullscreen-overlay=true sync=false", cv::VideoWriter::fourcc('R', 'X', '2', '4'), 30.0, cv::Size(HSIZE, VSIZE), true);
-
+	 std::cout << "XDG_SESSION_TYPE is:" << env_p << std::endl;
+	int compare = std::strcmp(env_p , a.c_str());
+	 std::cout << "string compare is:" << compare << std::endl;
+	
 	auto ml_task = vitis::ai::FaceDetect::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/densebox_640_360/densebox_640_360.xmodel");
 	auto ml_task_1 = vitis::ai::YOLOv2::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/yolov2_voc_pruned_0_77/yolov2_voc_pruned_0_77.xmodel");
 	auto ml_task_2 = vitis::ai::PlateDetect::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/plate_detect/plate_detect.xmodel");
@@ -304,7 +301,17 @@ void Detection()
 		{	
 			if(check_off == 1)
 			{
-				output.open("appsrc ! kmssink driver-name=xlnx plane-id=39 fullscreen-overlay=true sync=false", cv::VideoWriter::fourcc('R', 'X', '2', '4'), 30.0, cv::Size(HSIZE, VSIZE), true);
+				if (compare == 0)
+					{
+						std::cout << "Running remotly or Desktop environment not detected, Application will use kmssink to display video over monitor" << std::endl;
+						output.open("appsrc ! kmssink driver-name=xlnx fullscreen-overlay=true plane-id=39 sync=false", cv::VideoWriter::fourcc('R', 'X', '2', '4'), 30.0, cv::Size(HSIZE, VSIZE), true);
+						// kmssink driver-name=xlnx fullscreen-overlay=true plane-id=39 sync=false
+					}
+				else
+					{
+						std::cout << "Desktop environment detected, Application will lauch a window to display the video" << std::endl;
+						output.open("appsrc ! videoconvert ! video/x-raw, format=RGB16 ! ximagesink sync=false", cv::VideoWriter::fourcc('R', 'X', '1', '5'), 30.0, cv::Size(HSIZE, VSIZE), true);
+					}
 				check_off = 0;
 			}
 			output.write(cur_frame);
@@ -316,7 +323,9 @@ void Detection()
 				output.release();
 				check_off = 1;
 			}
+		
 		}
+		
 		if (fps)
 		{
 			i = i + 1;
