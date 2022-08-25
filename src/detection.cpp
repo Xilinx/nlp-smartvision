@@ -228,9 +228,9 @@ void Detection()
 	int compare = std::strcmp(env_p , a.c_str());
 	 std::cout << "string compare is:" << compare << std::endl;
 	
-	auto ml_task = vitis::ai::FaceDetect::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/densebox_640_360/densebox_640_360.xmodel");
-	auto ml_task_1 = vitis::ai::YOLOv2::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/yolov2_voc_pruned_0_77/yolov2_voc_pruned_0_77.xmodel");
-	auto ml_task_2 = vitis::ai::PlateDetect::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/plate_detect/plate_detect.xmodel");
+	auto ml_task = vitis::ai::FaceDetect::create("/opt/xilinx/kv260-nlp-smartvision//share/vitis_ai_library/models/densebox_640_360/densebox_640_360.xmodel");
+	auto ml_task_1 = vitis::ai::YOLOv2::create("/opt/xilinx/kv260-nlp-smartvision//share/vitis_ai_library/models/yolov2_voc_pruned_0_77/yolov2_voc_pruned_0_77.xmodel");
+	auto ml_task_2 = vitis::ai::PlateDetect::create("/opt/xilinx/kv260-nlp-smartvision//share/vitis_ai_library/models/plate_detect/plate_detect.xmodel");
 
 	cv::Mat cur_frame;
 	auto t_1 = std::chrono::steady_clock::now();
@@ -354,21 +354,21 @@ void test_models(char *file, char *aitask)
 	if (!strcmp(aitask, "densebox_640_360"))
 	{
 		// printf(("densebox.\n\n"));
-		auto ml_task = vitis::ai::FaceDetect::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/densebox_640_360/densebox_640_360.xmodel");
+		auto ml_task = vitis::ai::FaceDetect::create("/opt/xilinx/kv260-nlp-smartvision//share/vitis_ai_library/models/densebox_640_360/densebox_640_360.xmodel");
 		auto res = ml_task->run(I);
 		process_result_facedetect(&I, res, true, 0, bbox_thick, dleft, dright, green, blue, red);
 	}
 	else if (!strcmp(aitask, "yolov2_voc_pruned_0_77"))
 	{
 		// printf(("yolov2_voc_pruned_0_77.\n\n"));
-		auto ml_task = vitis::ai::YOLOv2::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/yolov2_voc_pruned_0_77/yolov2_voc_pruned_0_77.xmodel");
+		auto ml_task = vitis::ai::YOLOv2::create("/opt/xilinx/kv260-nlp-smartvision//share/vitis_ai_library/models/yolov2_voc_pruned_0_77/yolov2_voc_pruned_0_77.xmodel");
 		auto res = ml_task->run(I);
 		process_result_objectdetect(I, res, true, 0, bbox_thick, dleft, dright, green, blue, red);
 	}
 	else if (!strcmp(aitask, "plate_detect"))
 	{
 		// printf(("plate_detect.\n\n"));
-		auto ml_task = vitis::ai::PlateDetect::create("/opt/xilinx/share/vitis_ai_library/models/kv260-nlp-smartvision/plate_detect/plate_detect.xmodel");
+		auto ml_task = vitis::ai::PlateDetect::create("/opt/xilinx/kv260-nlp-smartvision//share/vitis_ai_library/models/plate_detect/plate_detect.xmodel");
 		auto res = ml_task->run(I);
 		process_result_platedetect(I, res, true, 0, bbox_thick, dleft, dright, green, blue, red);
 	}

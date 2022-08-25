@@ -13,5 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-export LD_LIBRARY_PATH="/opt/xilinx/lib:$LD_LIBRARY_PATH"
-/opt/xilinx/bin/nlp-smartvision.app "$@"
+pulseaudio -D >>/dev/null 2> /dev/null
+export PATH="/opt/xilinx/kv260-nlp-smartvision/bin:$PATH"
+export LD_LIBRARY_PATH="/opt/xilinx/kv260-nlp-smartvision/lib:$LD_LIBRARY_PATH"
+/opt/xilinx/kv260-nlp-smartvision/bin/nlp-smartvision.app "$@"

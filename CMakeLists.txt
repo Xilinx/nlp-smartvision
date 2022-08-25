@@ -28,7 +28,7 @@ find_package(GStreamer REQUIRED)
 find_package(OpenCV REQUIRED)
 #find_package(alsa-lib REQUIRED)
 
-SET(INSTALL_PATH "opt/xilinx")
+SET(INSTALL_PATH "/opt/xilinx/kv260-nlp-smartvision/")
 
 
 # Add ARM CMSIS shared library (ARM-DSP and ARM-NN used by hello_edge implementation)
@@ -89,6 +89,12 @@ install(FILES
     DESTINATION ${INSTALL_PATH}/
     RENAME  README_NLP_SMARTVISION
     )
+
+install(DIRECTORY
+    models/kv260/densebox_640_360
+	models/kv260/plate_detect
+    models/kv260/yolov2_voc_pruned_0_77
+    DESTINATION ${INSTALL_PATH}/share/vitis_ai_library/models)
 
 install(DIRECTORY
     notebook/
