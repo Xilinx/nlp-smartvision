@@ -28,7 +28,7 @@ find_package(GStreamer REQUIRED)
 find_package(OpenCV REQUIRED)
 #find_package(alsa-lib REQUIRED)
 
-SET(INSTALL_PATH "/opt/xilinx/kv260-nlp-smartvision/")
+SET(INSTALL_PATH "/opt/xilinx/kv260-nlp-smartvision")
 
 
 # Add ARM CMSIS shared library (ARM-DSP and ARM-NN used by hello_edge implementation)

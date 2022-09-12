@@ -156,6 +156,26 @@ static char findusbdevice()
 	return mipi_dev;
 }
 
+static bool xdg_session()
+{
+	std::ostringstream desktop_cmd;
+	const char* env_p = std::getenv("XDG_SESSION_TYPE");
+	if(env_p != NULL){
+	//	std::cout << "XDG_SESSION_TYPE is:" << env_p << std::endl;
+		std::string b = "tty";
+		int compare = std::strcmp(env_p , b.c_str());
+		if(compare != 0){
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	else{
+		return false;
+	}
+}
+
 void Detection()
 {
 	cv::Mat image_off;
@@ -221,16 +241,9 @@ void Detection()
 		image_off = cv::Mat(768, 1024, CV_8UC3, cv::Scalar(0, 0, 0));
 	}
 
-		std::ostringstream desktop_cmd;
-	const char* env_p = std::getenv("XDG_SESSION_TYPE");
-	std::string a = "tty";
-	 std::cout << "XDG_SESSION_TYPE is:" << env_p << std::endl;
-	int compare = std::strcmp(env_p , a.c_str());
-	 std::cout << "string compare is:" << compare << std::endl;
-	
-	auto ml_task = vitis::ai::FaceDetect::create("/opt/xilinx/kv260-nlp-smartvision//share/vitis_ai_library/models/densebox_640_360/densebox_640_360.xmodel");
-	auto ml_task_1 = vitis::ai::YOLOv2::create("/opt/xilinx/kv260-nlp-smartvision//share/vitis_ai_library/models/yolov2_voc_pruned_0_77/yolov2_voc_pruned_0_77.xmodel");
-	auto ml_task_2 = vitis::ai::PlateDetect::create("/opt/xilinx/kv260-nlp-smartvision//share/vitis_ai_library/models/plate_detect/plate_detect.xmodel");
+	auto ml_task = vitis::ai::FaceDetect::create("/opt/xilinx/kv260-nlp-smartvision/share/vitis_ai_library/models/densebox_640_360/densebox_640_360.xmodel");
+	auto ml_task_1 = vitis::ai::YOLOv2::create("/opt/xilinx/kv260-nlp-smartvision/share/vitis_ai_library/models/yolov2_voc_pruned_0_77/yolov2_voc_pruned_0_77.xmodel");
+	auto ml_task_2 = vitis::ai::PlateDetect::create("/opt/xilinx/kv260-nlp-smartvision/share/vitis_ai_library/models/plate_detect/plate_detect.xmodel");
 
 	cv::Mat cur_frame;
 	auto t_1 = std::chrono::steady_clock::now();
@@ -301,7 +314,7 @@ void Detection()
 		{	
 			if(check_off == 1)
 			{
-				if (compare == 0)
+				if ( !xdg_session())
 					{
 						std::cout << "Running remotly or Desktop environment not detected, Application will use kmssink to display video over monitor" << std::endl;
 						output.open("appsrc ! kmssink driver-name=xlnx fullscreen-overlay=true plane-id=39 sync=false", cv::VideoWriter::fourcc('R', 'X', '2', '4'), 30.0, cv::Size(HSIZE, VSIZE), true);
@@ -312,6 +325,7 @@ void Detection()
 						std::cout << "Desktop environment detected, Application will lauch a window to display the video" << std::endl;
 						output.open("appsrc ! videoconvert ! video/x-raw, format=RGB16 ! ximagesink sync=false", cv::VideoWriter::fourcc('R', 'X', '1', '5'), 30.0, cv::Size(HSIZE, VSIZE), true);
 					}
+
 				check_off = 0;
 			}
 			output.write(cur_frame);
@@ -354,21 +368,21 @@ void test_models(char *file, char *aitask)
 	if (!strcmp(aitask, "densebox_640_360"))
 	{
 		// printf(("densebox.\n\n"));
-		auto ml_task = vitis::ai::FaceDetect::create("/opt/xilinx/kv260-nlp-smartvision//share/vitis_ai_library/models/densebox_640_360/densebox_640_360.xmodel");
+		auto ml_task = vitis::ai::FaceDetect::create("/opt/xilinx/kv260-nlp-smartvision/share/vitis_ai_library/models/densebox_640_360/densebox_640_360.xmodel");
 		auto res = ml_task->run(I);
 		process_result_facedetect(&I, res, true, 0, bbox_thick, dleft, dright, green, blue, red);
 	}
 	else if (!strcmp(aitask, "yolov2_voc_pruned_0_77"))
 	{
 		// printf(("yolov2_voc_pruned_0_77.\n\n"));
-		auto ml_task = vitis::ai::YOLOv2::create("/opt/xilinx/kv260-nlp-smartvision//share/vitis_ai_library/models/yolov2_voc_pruned_0_77/yolov2_voc_pruned_0_77.xmodel");
+		auto ml_task = vitis::ai::YOLOv2::create("/opt/xilinx/kv260-nlp-smartvision/share/vitis_ai_library/models/yolov2_voc_pruned_0_77/yolov2_voc_pruned_0_77.xmodel");
 		auto res = ml_task->run(I);
 		process_result_objectdetect(I, res, true, 0, bbox_thick, dleft, dright, green, blue, red);
 	}
 	else if (!strcmp(aitask, "plate_detect"))
 	{
 		// printf(("plate_detect.\n\n"));
-		auto ml_task = vitis::ai::PlateDetect::create("/opt/xilinx/kv260-nlp-smartvision//share/vitis_ai_library/models/plate_detect/plate_detect.xmodel");
+		auto ml_task = vitis::ai::PlateDetect::create("/opt/xilinx/kv260-nlp-smartvision/share/vitis_ai_library/models/plate_detect/plate_detect.xmodel");
 		auto res = ml_task->run(I);
 		process_result_platedetect(I, res, true, 0, bbox_thick, dleft, dright, green, blue, red);
 	}
