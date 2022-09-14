@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
   int option_index, c;
   static const char short_options[] = "hmuf:tv";
   static const struct option long_options[] = {
-      {"help", 0, 0, 'h'}, {"mipi", 0, 0, 'm'}, {"usb", 1, 0, 'u'}, {"file-audio", 1, 0, 'f'}, {"test", 0, 0, 't'}, {"verbose", 0, 0, 'v'}, {0, 0, 0, 0}};
+      {"help", 0, 0, 'h'}, {"mipi", 0, 0, 'm'}, {"usb", 0, 0, 'u'}, {"file-audio", 1, 0, 'f'}, {"test", 0, 0, 't'}, {"verbose", 0, 0, 'v'}, {0, 0, 0, 0}};
 
   if (argc == 1 || argc > 4)
   {
