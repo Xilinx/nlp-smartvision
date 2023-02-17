@@ -1,10 +1,23 @@
-## NLP application for Ubuntu 22.04:
+
+<h1 align="center">NLP SMARTVISION APPLICATION </h1>
+
+## Introduction
+This repository contains source code of Kria SOM NLP Smartvision accelerated application. 
+
  The natural language processing (NLP) SmartVision implements keyword spotting (KWS) on processing system (PS) 
  and face detection, objectdetect, platedetect running on programmable logic (PL). 
  It showcases keyword based dynamic switching between multiple tasks and modifying display properties.
+
+ <div align="center">
+  <img src="./media/nlp_image_landing.png" width=800>
+</div>
+ 
  For more details refer [ubuntu release page](https://ubuntu.com/download/xilinx)
 
-## LICENSE
+## Setting up the Board and Application Deployment
+A step by step tutorial and details on how to setup the board and run this application is given in the [NLP SmartVision Documentation](https://xilinx.github.io/kria-apps-docs/kv260/2022.1/build/html/docs/nlp-smartvision/docs/app_deployment_nlp.html). Please visit the documentation page for more details.
+
+## License
 
 ````
 Copyright 2022 Xilinx Inc.
